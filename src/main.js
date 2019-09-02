@@ -16,6 +16,8 @@ function createShader(gl, type, source) {
 
   console.log(gl.getShaderInfoLog(shader));
   gl.deleteShader(shader);
+
+  return null;
 }
 
 function createProgram(gl, vertexShader, fragmentShader) {
@@ -33,6 +35,8 @@ function createProgram(gl, vertexShader, fragmentShader) {
 
   console.log(gl.getProgramInfoLog(program));
   gl.deleteProgram(program);
+
+  return null;
 }
 
 function main() {
@@ -55,6 +59,9 @@ function main() {
     createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
   const program = createProgram(gl, vertexShader, fragmentShader);
+  const positionAttributeLocation =
+    gl.getAttribLocation(program, 'a_position');
+  const positionBuffer = gl.createBuffer();
 }
 
 main();
