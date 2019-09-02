@@ -1,0 +1,23 @@
+{
+  "name": "hello-webgl",
+  "version": "1.0.0",
+  "description": "",
+  "devDependencies": {
+    "eslint": "6.3.0",
+    "eslint-config-urbica": "3.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/device25/hello-webgl.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/device25/hello-webgl/issues"
+  },
+  "homepage": "https://github.com/device25/hello-webgl#readme"
+}

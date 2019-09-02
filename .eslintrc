@@ -1,0 +1,6 @@
+{
+  "extends": "urbica",
+  "env": {
+    "browser": true
+  }
+}
