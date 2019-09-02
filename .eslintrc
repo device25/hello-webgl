@@ -2,5 +2,16 @@
   "extends": "urbica",
   "env": {
     "browser": true
+  },
+  "rules": {
+    "no-param-reassign": [
+      "error",
+      {
+        "props": true,
+        "ignorePropertyModificationsFor": [
+          "gl"
+        ]
+      }
+    ]
   }
 }
