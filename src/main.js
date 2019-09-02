@@ -59,7 +59,7 @@ function createProgram(gl, vertexShader, fragmentShader) {
   return null;
 }
 
-function main() {
+async function main() {
   const canvas = document.getElementById('c');
   const gl = canvas.getContext('webgl');
 
@@ -68,10 +68,10 @@ function main() {
     return;
   }
 
-  const vertexShaderSource =
-    document.getElementById('2d-vertex-shader').text;
-  const fragmentShaderSource =
-    document.getElementById('2d-fragment-shader').text;
+  const vertexShaderSource = await fetch('./triangle.vertex.glsl')
+    .then(res => res.text());
+  const fragmentShaderSource = await fetch('./triangle.fragment.glsl')
+    .then(res => res.text());
 
   const vertexShader =
     createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
