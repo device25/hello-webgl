@@ -81,6 +81,8 @@ async function main() {
   const program = createProgram(gl, vertexShader, fragmentShader);
   const positionAttributeLocation =
     gl.getAttribLocation(program, 'a_position');
+  const resolutionUniformLocation =
+    gl.getUniformLocation(program, 'u_resolution');
 
   const positionBuffer = gl.createBuffer();
 
@@ -100,9 +102,12 @@ async function main() {
    * не будем менять эти данные.
    * */
   const positions = [
-    0, 0,
-    0, 0.5,
-    0.7, 0
+    10, 20,
+    80, 20,
+    10, 30,
+    10, 30,
+    80, 20,
+    80, 30
   ];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
@@ -121,6 +126,9 @@ async function main() {
 
   // говорим использовать нашу программу (пару шейдеров)
   gl.useProgram(program);
+
+  // установка разрешения
+  gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 
   gl.enableVertexAttribArray(positionAttributeLocation);
 
@@ -143,8 +151,9 @@ async function main() {
     positionAttributeLocation, size, type, normalize, stride, offset
   );
 
+  // отрисовка
   const primitiveType = gl.TRIANGLES;
-  const count = 3;
+  const count = 6;
   gl.drawArrays(primitiveType, offset, count);
 }
 
