@@ -68,9 +68,9 @@ async function main() {
     return;
   }
 
-  const vertexShaderSource = await fetch('./triangle.vertex.glsl')
+  const vertexShaderSource = await fetch('./index.vertex.glsl')
     .then(res => res.text());
-  const fragmentShaderSource = await fetch('./triangle.fragment.glsl')
+  const fragmentShaderSource = await fetch('./index.fragment.glsl')
     .then(res => res.text());
 
   const vertexShader =
