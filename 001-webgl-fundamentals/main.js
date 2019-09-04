@@ -59,6 +59,34 @@ function createProgram(gl, vertexShader, fragmentShader) {
   return null;
 }
 
+// возврат случайного целого числа значением от 0 до range-1
+function randomInt(range) {
+  return Math.floor(Math.random() * range);
+}
+
+// заполнение буфера значениями, которые определяют прямоугольник
+function setRectangle(gl, x, y, width, height) {
+  const x1 = x;
+  const x2 = x + width;
+  const y1 = y;
+  const y2 = y + height;
+
+  /**
+   * ПРИМ.: gl.bufferData(gl.ARRAY_BUFFER, ...) воздействует
+   * на буфер, который привязан к точке привязке `ARRAY_BUFFER`,
+   * но таким образом у нас будет один буфер. Если бы нам понадобилось
+   * несколько буферов, нам бы потребовалось привязать их сначала к
+   * `ARRAY_BUFFER`.
+   */
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    x1, y1,
+    x2, y1,
+    x1, y2,
+    x1, y2,
+    x2, y1,
+    x2, y2]), gl.STATIC_DRAW);
+}
+
 async function main() {
   const canvas = document.getElementById('c');
   const gl = canvas.getContext('webgl');
@@ -83,33 +111,12 @@ async function main() {
     gl.getAttribLocation(program, 'a_position');
   const resolutionUniformLocation =
     gl.getUniformLocation(program, 'u_resolution');
+  const colorUniformLocation =
+    gl.getUniformLocation(program, 'u_color');
 
   const positionBuffer = gl.createBuffer();
 
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-  /**
-   * Здесь происходит несколько вещей. Сперва у нас есть JavaScript-массив
-   * positions. Но для WebGL нужны строго типизированные данные, поэтому нам
-   * нужно явно создать массив 32-битных чисел с плавающей точкой через
-   * new Float32Array(positions), куда скопируются значения из массива
-   * positions. Далее gl.bufferData копирует типизированные данные в
-   * positionBuffer на видеокарте. Копирование происходит в буфер положений,
-   * потому что мы привязали его к точке связи ARRAY_BUFFER выше.
-   * Через последний аргумент gl.STATIC_DRAW мы указываем, как WebGL должен
-   * использовать данные. WebGL может использовать эту подсказку для оптимизации
-   * определённых вещей. gl.STATIC_DRAW говорит о том, что скорей всего мы
-   * не будем менять эти данные.
-   * */
-  const positions = [
-    10, 20,
-    80, 20,
-    10, 30,
-    10, 30,
-    80, 20,
-    80, 30
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
   /**
    * code above this line is initialization code.
@@ -151,10 +158,28 @@ async function main() {
     positionAttributeLocation, size, type, normalize, stride, offset
   );
 
-  // отрисовка
-  const primitiveType = gl.TRIANGLES;
-  const count = 6;
-  gl.drawArrays(primitiveType, offset, count);
+
+  // на каждое движение мышки
+  // создаём 50 прямоугольников в произвольных местах со случайным цветом
+  window.onmousemove = () => {
+    for (let ii = 0; ii < 5; ii += 1) {
+      // задаём произвольный прямоугольник
+      // Запись будет происходить в positionBuffer,
+      // так как он был привязан последник к
+      // точке связи ARRAY_BUFFER
+      setRectangle(
+        gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300)
+      );
+
+      // задаём случайный цвет
+      gl.uniform4f(
+        colorUniformLocation, Math.random(), Math.random(), Math.random(), 1
+      );
+
+      // отрисовка прямоугольника
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+  };
 }
 
 main();
