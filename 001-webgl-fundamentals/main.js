@@ -158,11 +158,14 @@ async function main() {
     positionAttributeLocation, size, type, normalize, stride, offset
   );
 
+  const inputValue = document.getElementById('input');
 
-  // на каждое движение мышки
-  // создаём 50 прямоугольников в произвольных местах со случайным цветом
-  window.onmousemove = () => {
-    for (let ii = 0; ii < 5; ii += 1) {
+  /**
+   * в каждом кадре создаём прямоугольники в произвольных местах со случайным
+   * цветом. Количество зависит от значения в инпуте
+   */
+  function drawRect() {
+    for (let ii = 0; ii < inputValue.value; ii += 1) {
       // задаём произвольный прямоугольник
       // Запись будет происходить в positionBuffer,
       // так как он был привязан последник к
@@ -179,7 +182,10 @@ async function main() {
       // отрисовка прямоугольника
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
-  };
+    window.requestAnimationFrame(drawRect);
+  }
+
+  window.requestAnimationFrame(drawRect);
 }
 
 main();
