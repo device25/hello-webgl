@@ -162,27 +162,40 @@ async function main() {
 
   /**
    * в каждом кадре создаём прямоугольники в произвольных местах со случайным
-   * цветом. Количество зависит от значения в инпуте
+   * цветом. Количество и скорость отрисовки зависит от значениях в инпутах
    */
+  let now;
+  let then = Date.now();
+  let delta;
+
   function drawRect() {
-    for (let ii = 0; ii < inputValue.value; ii += 1) {
-      // задаём произвольный прямоугольник
-      // Запись будет происходить в positionBuffer,
-      // так как он был привязан последник к
-      // точке связи ARRAY_BUFFER
-      setRectangle(
-        gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300)
-      );
-
-      // задаём случайный цвет
-      gl.uniform4f(
-        colorUniformLocation, Math.random(), Math.random(), Math.random(), 1
-      );
-
-      // отрисовка прямоугольника
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-    }
     window.requestAnimationFrame(drawRect);
+
+    const interval = 1000 / document.getElementById('fpsInput').value;
+    now = Date.now();
+    delta = now - then;
+
+    if (delta > interval) {
+      for (let ii = 0; ii < inputValue.value; ii += 1) {
+        // задаём произвольный прямоугольник
+        // Запись будет происходить в positionBuffer,
+        // так как он был привязан последник к
+        // точке связи ARRAY_BUFFER
+        setRectangle(
+          gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300)
+        );
+
+        // задаём случайный цвет
+        gl.uniform4f(
+          colorUniformLocation, Math.random(), Math.random(), Math.random(), 1
+        );
+
+        // отрисовка прямоугольника
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        then = now - (delta % interval);
+      }
+    }
   }
 
   window.requestAnimationFrame(drawRect);
