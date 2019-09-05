@@ -1,7 +1,15 @@
+function map(value, minSrc, maxSrc, minDst, maxDst) {
+  return (value - minSrc) / (maxSrc - minSrc) * (maxDst - minDst) + minDst;
+}
+
 class Main {
   canvas = document.getElementById('canvas');
 
   gl = this.canvas.getContext('webgl');
+
+  mouseX = 0;
+
+  mouseY = 0;
 
   constructor(props) {
     const { coords, pointSize, color, vertices, mode, vertexCount } = props;
@@ -12,6 +20,8 @@ class Main {
     this._initGL();
     this._createShaders();
     this._createVertices(coords, pointSize, color);
+
+    this.canvas.addEventListener('mousemove', this._onMouseMove);
   }
 
   _initGL() {
@@ -83,12 +93,26 @@ class Main {
     gl.uniform4f(colorLocation, ...color);
   }
 
+  _onMouseMove = (event) => {
+    this.mouseX = map(event.clientX, 0, this.canvas.width, -1, 1);
+    this.mouseY = map(event.clientY, 0, this.canvas.height, 1, -1);
+  };
+
   draw = () => {
     const { gl, mode, vertexCount } = this;
 
     for (let i = 0; i < vertexCount * 2; i += 2) {
-      this.vertices[i] += Math.random() * 0.01 - 0.005;
-      this.vertices[i + 1] += Math.random() * 0.01 - 0.005;
+      const dx = this.vertices[i] - this.mouseX;
+      const dy = this.vertices[i + 1] - this.mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 0.2) {
+        this.vertices[i] = this.mouseX + dx / dist * 0.2;
+        this.vertices[i + 1] = this.mouseY + dy / dist * 0.2;
+      } else {
+        this.vertices[i] += Math.random() * 0.01 - 0.005;
+        this.vertices[i + 1] += Math.random() * 0.01 - 0.005;
+      }
     }
 
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(this.vertices));
@@ -110,7 +134,7 @@ const props = {
    * TRIANGLES
    * */
   mode: 'POINTS',
-  vertexCount: 5000
+  vertexCount: 50000
 };
 
 for (let i = 0; i < props.vertexCount; i += 1) {
