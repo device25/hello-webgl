@@ -3,9 +3,12 @@ class Main {
 
   gl = this.canvas.getContext('webgl');
 
-  constructor() {
+  constructor(props) {
+    const { coords, pointSize, color } = props;
+
     this._initGL();
     this._createShaders();
+    this._createVertices(coords, pointSize, color);
   }
 
   _initGL() {
@@ -19,9 +22,12 @@ class Main {
     const { gl } = this;
 
     const vertexSource = `
+    attribute vec4 coords;
+    attribute float pointSize;
+    
     void main() {
-      gl_Position = vec4(0.5, 0.5, 0, 1);
-      gl_PointSize = 100.0;
+      gl_Position = coords;
+      gl_PointSize = pointSize;
     }
   `;
 
@@ -29,9 +35,13 @@ class Main {
     gl.shaderSource(vertexShader, vertexSource);
     gl.compileShader(vertexShader);
 
+    // mediump NOT medium
     const fragmentSource = `
+    precision mediump float;
+    uniform vec4 color;
+    
     void main() {
-      gl_FragColor = vec4(1.0, 0, 0, 1);
+      gl_FragColor = color;
     }
   `;
 
@@ -48,6 +58,18 @@ class Main {
     this.shaderProgram = shaderProgram;
   }
 
+  _createVertices(coords, pointSize, color) {
+    const { gl, shaderProgram } = this;
+
+    const coordsLocation = gl.getAttribLocation(shaderProgram, 'coords');
+    const pointSizeLocation = gl.getAttribLocation(shaderProgram, 'pointSize');
+    gl.vertexAttrib3f(coordsLocation, ...coords);
+    gl.vertexAttrib1f(pointSizeLocation, pointSize);
+
+    const colorLocation = gl.getUniformLocation(shaderProgram, 'color');
+    gl.uniform4f(colorLocation, ...color);
+  }
+
   draw() {
     const { gl } = this;
 
@@ -56,6 +78,11 @@ class Main {
   }
 }
 
-const main = new Main();
+const props = {
+  coords: [0.2, 0, 0],
+  pointSize: 100.0,
+  color: [1, 0, 1, 1]
+};
+const main = new Main(props);
 
 main.draw();
