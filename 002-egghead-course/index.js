@@ -4,9 +4,10 @@ class Main {
   gl = this.canvas.getContext('webgl');
 
   constructor(props) {
-    const { coords, pointSize, color, vertices, mode } = props;
+    const { coords, pointSize, color, vertices, mode, vertexCount } = props;
     this.mode = mode;
     this.vertices = vertices;
+    this.vertexCount = vertexCount;
 
     this._initGL();
     this._createShaders();
@@ -83,16 +84,16 @@ class Main {
   }
 
   draw = () => {
-    const { gl, mode } = this;
+    const { gl, mode, vertexCount } = this;
 
-    for (let i = 0; i < 10000; i += 2) {
+    for (let i = 0; i < vertexCount * 2; i += 2) {
       this.vertices[i] += Math.random() * 0.01 - 0.005;
       this.vertices[i + 1] += Math.random() * 0.01 - 0.005;
     }
 
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(this.vertices));
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl[mode], 0, 5000);
+    gl.drawArrays(gl[mode], 0, vertexCount);
 
     requestAnimationFrame(this.draw);
   };
@@ -108,10 +109,11 @@ const props = {
    * LINES || LINE_STRIP || LINE_LOOP
    * TRIANGLES
    * */
-  mode: 'POINTS'
+  mode: 'POINTS',
+  vertexCount: 5000
 };
 
-for (let i = 0; i < 5000; i += 1) {
+for (let i = 0; i < props.vertexCount; i += 1) {
   props.vertices.push(Math.random() * 2 - 1);
   props.vertices.push(Math.random() * 2 - 1);
 }
