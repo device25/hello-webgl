@@ -1,51 +1,61 @@
-function initGl(gl, width, height) {
-  gl.viewport(0, 0, width, height);
-  gl.clearColor(1, 1, 1, 1);
-}
+class Main {
+  canvas = document.getElementById('canvas');
 
-function createShaders(gl) {
-  const vertexSource = `
+  gl = this.canvas.getContext('webgl');
+
+  constructor() {
+    this._initGL();
+    this._createShaders();
+  }
+
+  _initGL() {
+    const { gl, canvas } = this;
+
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(1, 1, 1, 1);
+  }
+
+  _createShaders() {
+    const { gl } = this;
+
+    const vertexSource = `
     void main() {
       gl_Position = vec4(0.5, 0.5, 0, 1);
       gl_PointSize = 100.0;
     }
   `;
 
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vertexShader, vertexSource);
-  gl.compileShader(vertexShader);
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, vertexSource);
+    gl.compileShader(vertexShader);
 
-  const fragmentSource = `
+    const fragmentSource = `
     void main() {
       gl_FragColor = vec4(1.0, 0, 0, 1);
     }
   `;
 
-  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fragmentShader, fragmentSource);
-  gl.compileShader(fragmentShader);
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShader, fragmentSource);
+    gl.compileShader(fragmentShader);
 
-  const shaderProgram = gl.createProgram();
-  gl.attachShader(shaderProgram, vertexShader);
-  gl.attachShader(shaderProgram, fragmentShader);
-  gl.linkProgram(shaderProgram);
-  gl.useProgram(shaderProgram);
+    const shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    gl.useProgram(shaderProgram);
 
-  return shaderProgram;
+    this.shaderProgram = shaderProgram;
+  }
+
+  draw() {
+    const { gl } = this;
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.POINTS, 0, 1);
+  }
 }
 
-function draw(gl) {
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.POINTS, 0, 1);
-}
+const main = new Main();
 
-function main() {
-  const canvas = document.getElementById('canvas');
-  const gl = canvas.getContext('webgl');
-
-  initGl(gl, canvas.width, canvas.height);
-  createShaders(gl);
-  draw(gl);
-}
-
-main();
+main.draw();
