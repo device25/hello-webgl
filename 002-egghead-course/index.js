@@ -66,14 +66,14 @@ class Main {
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(
-      gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
     const coordsLocation = gl.getAttribLocation(shaderProgram, 'coords');
     // gl.vertexAttrib3f(coordsLocation, ...coords);
     gl.vertexAttribPointer(
-      coordsLocation, 3, gl.FLOAT, false, 0, 0);
+      coordsLocation, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(coordsLocation);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    // gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     const pointSizeLocation = gl.getAttribLocation(shaderProgram, 'pointSize');
     gl.vertexAttrib1f(pointSizeLocation, pointSize);
@@ -82,38 +82,40 @@ class Main {
     gl.uniform4f(colorLocation, ...color);
   }
 
-  draw() {
+  draw = () => {
     const { gl, mode } = this;
 
+    for (let i = 0; i < 10000; i += 2) {
+      this.vertices[i] += Math.random() * 0.01 - 0.005;
+      this.vertices[i + 1] += Math.random() * 0.01 - 0.005;
+    }
+
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(this.vertices));
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl[mode], 0, 3);
-    gl.drawArrays(gl[mode], 7, 3);
-  }
+    gl.drawArrays(gl[mode], 0, 5000);
+
+    requestAnimationFrame(this.draw);
+  };
 }
 
 const props = {
   coords: [0.2, 0, 0],
-  pointSize: 3.0,
+  pointSize: 2.0,
   color: [0.0, 1.0, 1.0, 1.0],
-  vertices: [
-    -0.9, 0.5, 0,
-    -0.7, -0.5, 0,
-    -0.5, 0.5, 0,
-    -0.3, -0.5, 0,
-    -0.1, 0.5, 0,
-    0.1, -0.5, 0,
-    0.3, 0.5, 0,
-    0.5, -0.5, 0,
-    0.7, 0.5, 0,
-    0.9, -0.5, 0
-  ],
+  vertices: [],
   /**
    * POINTS
    * LINES || LINE_STRIP || LINE_LOOP
    * TRIANGLES
    * */
-  mode: 'LINE_STRIP'
+  mode: 'POINTS'
 };
+
+for (let i = 0; i < 5000; i += 1) {
+  props.vertices.push(Math.random() * 2 - 1);
+  props.vertices.push(Math.random() * 2 - 1);
+}
+
 const main = new Main(props);
 
 main.draw();
