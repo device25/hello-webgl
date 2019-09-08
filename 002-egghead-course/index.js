@@ -3,16 +3,17 @@ function map(value, minSrc, maxSrc, minDst, maxDst) {
 }
 
 class Main {
-  canvas = document.getElementById('canvas');
-
-  gl = this.canvas.getContext('webgl');
-
   mouseX = 0;
 
   mouseY = 0;
 
   constructor(props) {
-    const { coords, pointSize, color, vertices, mode, vertexCount } = props;
+    const {
+      coords, pointSize, color, vertices, mode, vertexCount, canvas
+    } = props;
+
+    this.canvas = canvas;
+    this.gl = this.canvas.getContext('webgl');
     this.mode = mode;
     this.vertices = vertices;
     this.vertexCount = vertexCount;
@@ -123,6 +124,7 @@ class Main {
   };
 }
 
+const canvas = document.getElementById('canvas');
 const props = {
   coords: [0.2, 0, 0],
   pointSize: 2.0,
@@ -134,7 +136,8 @@ const props = {
    * TRIANGLES
    * */
   mode: 'POINTS',
-  vertexCount: 50000
+  vertexCount: 50000,
+  canvas
 };
 
 for (let i = 0; i < props.vertexCount; i += 1) {
