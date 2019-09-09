@@ -80,17 +80,55 @@ class Triangles {
   }
 
   _createVertices() {
-    const vertices = [];
-    const colors = [];
-    for (let i = 0; i < this._vertexCount; i += 1) {
-      vertices.push(Math.random() * 2 - 1);
-      vertices.push(Math.random() * 2 - 1);
-      vertices.push(Math.random() * 2 - 1);
-      colors.push(Math.random());
-      colors.push(Math.random());
-      colors.push(Math.random());
-      colors.push(1);
-    }
+    const vertices = [
+      0.88, -0.25, -0.18,     1, 0, 0, 1,
+      0.9, 0.25, 0,           1, 0, 0, 1,
+      0.88, -0.25, 0.18,      1, 0, 0, 1,
+
+      0.85, -0.25, 0.29,      1, 1, 0, 1,
+      0.78, 0.25, 0.45,       1, 1, 0, 1,
+      0.67, -0.25, 0.6,       1, 1, 0, 1,
+
+      0.6, -0.25, 0.67,       0, 1, 0, 1,
+      0.45, 0.25, 0.78,       0, 1, 0, 1,
+      0.29, -0.25, 0.85,      0, 1, 0, 1,
+
+      0.18, -0.25, 0.88,      0, 1, 1, 1,
+      0, 0.25, 0.9,           0, 1, 1, 1,
+      -0.18, -0.25, 0.88,     0, 1, 1, 1,
+
+      -0.29, -0.25, 0.85,     0, 0, 1, 1,
+      -0.45, 0.25, 0.78,      1, 1, 0, 1,
+      -0.6, -0.25, 0.67,      0, 0, 1, 1,
+
+      -0.67, -0.25, 0.6,      1, 0, 1, 1,
+      -0.78, 0.25, 0.45,      1, 0, 1, 1,
+      -0.85, -0.25, 0.29,     1, 0, 1, 1,
+
+      -0.88, -0.25, 0.18,     1, 0.5, 0, 1,
+      -0.9, 0.25, 0,          1, 0.5, 0, 1,
+      -0.88, -0.25, -0.18,    1, 0.5, 0, 1,
+
+      -0.85, -0.25, -0.29,    0, 0.5, 1, 1,
+      -0.78, 0.25, -0.45,     0, 0.5, 1, 1,
+      -0.67, -0.25, -0.6,     0, 0.5, 1, 1,
+
+      -0.6, -0.25, -0.67,     0, 1, 0.5, 1,
+      -0.45, 0.25, -0.78,     0, 1, 0.5, 1,
+      -0.29, -0.25, -0.85,    0, 1, 0.5, 1,
+
+      -0.18, -0.25, -0.88,    1, 0, 0.5, 1,
+      0, 0.25, -0.9,          1, 0, 0.5, 1,
+      0.18, -0.25, -0.88,     1, 0, 0.5, 1,
+
+      0.29, -0.25, -0.85,     0.5, 1, 0, 1,
+      0.45, 0.25, -0.78,      0.5, 1, 0, 1,
+      0.6, -0.25, -0.67,      0.5, 1, 0, 1,
+
+      0.67, -0.25, -0.6,      0.5, 0, 1, 1,
+      0.78, 0.25, -0.45,      0.5, 0, 1, 1,
+      0.85, -0.25, -0.29,     0.5, 0, 1, 1
+    ];
 
     const buffer = this._gl.createBuffer();
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
@@ -100,23 +138,27 @@ class Triangles {
     const coordsLocation =
       this._gl.getAttribLocation(this._shaderProgram, 'coords');
     this._gl.vertexAttribPointer(
-      coordsLocation, 3, this._gl.FLOAT, false, 0, 0);
+      coordsLocation,
+      3,
+      this._gl.FLOAT,
+      false,
+      Float32Array.BYTES_PER_ELEMENT * 7,
+      0
+    );
     this._gl.enableVertexAttribArray(coordsLocation);
-    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, null);
-
-
-    const colorBuffer = this._gl.createBuffer();
-    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, colorBuffer);
-    this._gl.bufferData(
-      this._gl.ARRAY_BUFFER, new Float32Array(colors), this._gl.STATIC_DRAW);
 
     const colorsLocation =
       this._gl.getAttribLocation(this._shaderProgram, 'colors');
     this._gl.vertexAttribPointer(
-      colorsLocation, 4, this._gl.FLOAT, false, 0, 0);
+      colorsLocation,
+      4,
+      this._gl.FLOAT,
+      false,
+      Float32Array.BYTES_PER_ELEMENT * 7,
+      Float32Array.BYTES_PER_ELEMENT * 3
+    );
     this._gl.enableVertexAttribArray(colorsLocation);
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, null);
-
 
     const pointSize =
       this._gl.getAttribLocation(this._shaderProgram, 'pointSize');
@@ -141,7 +183,7 @@ class Triangles {
 
 const props = {
   canvas: document.getElementById('canvas'),
-  vertexCount: 30
+  vertexCount: 36
 };
 
 const triangles = new Triangles(props);
