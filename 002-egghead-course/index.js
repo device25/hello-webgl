@@ -17,6 +17,7 @@ class Main {
     this.mode = mode;
     this.vertices = vertices;
     this.vertexCount = vertexCount;
+    this.matrix = window.mat4.create();
 
     this._initGL();
     this._createShaders();
@@ -38,9 +39,10 @@ class Main {
     const vertexSource = `
       attribute vec4 coords;
       attribute float pointSize;
+      uniform mat4 transformMatrix;
     
       void main() {
-        gl_Position = coords;
+        gl_Position = coords * transformMatrix;
         gl_PointSize = pointSize;
       }
     `;
@@ -83,7 +85,7 @@ class Main {
     const coordsLocation = gl.getAttribLocation(shaderProgram, 'coords');
     // gl.vertexAttrib3f(coordsLocation, ...coords);
     gl.vertexAttribPointer(
-      coordsLocation, 2, gl.FLOAT, false, 0, 0);
+      coordsLocation, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(coordsLocation);
     // gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
@@ -113,8 +115,18 @@ class Main {
       } else {
         this.vertices[i] += Math.random() * 0.01 - 0.005;
         this.vertices[i + 1] += Math.random() * 0.01 - 0.005;
+        this.vertices[i + 2] += Math.random() * 0.01 - 0.005;
       }
     }
+
+    window.mat4.rotateX(this.matrix, this.matrix, 0.01);
+    window.mat4.rotateY(this.matrix, this.matrix, 0.01);
+    window.mat4.rotateZ(this.matrix, this.matrix, 0.01);
+
+    const transformMatrixLocation =
+      gl.getUniformLocation(this.shaderProgram, 'transformMatrix');
+    gl.uniformMatrix4fv(transformMatrixLocation, false, this.matrix);
+
 
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(this.vertices));
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -141,6 +153,7 @@ const props = {
 };
 
 for (let i = 0; i < props.vertexCount; i += 1) {
+  props.vertices.push(Math.random() * 2 - 1);
   props.vertices.push(Math.random() * 2 - 1);
   props.vertices.push(Math.random() * 2 - 1);
 }
