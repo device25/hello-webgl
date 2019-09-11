@@ -81,55 +81,27 @@ class Triangles {
   }
 
   _createVertices() {
-    const vertices = [
-      0.88, -0.25, -0.18,     1, 0, 0, 1,
-      0.9, 0.25, 0,           1, 0, 0, 1,
-      0.88, -0.25, 0.18,      1, 0, 0, 1,
+    const vertices = [];
 
-      0.85, -0.25, 0.29,      1, 1, 0, 1,
-      0.78, 0.25, 0.45,       1, 1, 0, 1,
-      0.67, -0.25, 0.6,       1, 1, 0, 1,
+    for (let i = 0; i < 2; i += 0.01) {
+      vertices.push(i - 1);
+      vertices.push(-0.3);
+      vertices.push(Math.sin(i * 10) * 0.2);
+      vertices.push(i / 2);
+      vertices.push(0);
+      vertices.push(1 - i / 2);
+      vertices.push(1);
 
-      0.6, -0.25, 0.67,       0, 1, 0, 1,
-      0.45, 0.25, 0.78,       0, 1, 0, 1,
-      0.29, -0.25, 0.85,      0, 1, 0, 1,
+      vertices.push(i - 1);
+      vertices.push(0.3);
+      vertices.push(Math.sin(i * 10) * 0.2);
+      vertices.push(0);
+      vertices.push(1 - i / 2);
+      vertices.push(i / 2);
+      vertices.push(1);
+    }
 
-      0.18, -0.25, 0.88,      0, 1, 1, 1,
-      0, 0.25, 0.9,           0, 1, 1, 1,
-      -0.18, -0.25, 0.88,     0, 1, 1, 1,
-
-      -0.29, -0.25, 0.85,     0, 0, 1, 1,
-      -0.45, 0.25, 0.78,      1, 1, 0, 1,
-      -0.6, -0.25, 0.67,      0, 0, 1, 1,
-
-      -0.67, -0.25, 0.6,      1, 0, 1, 1,
-      -0.78, 0.25, 0.45,      1, 0, 1, 1,
-      -0.85, -0.25, 0.29,     1, 0, 1, 1,
-
-      -0.88, -0.25, 0.18,     1, 0.5, 0, 1,
-      -0.9, 0.25, 0,          1, 0.5, 0, 1,
-      -0.88, -0.25, -0.18,    1, 0.5, 0, 1,
-
-      -0.85, -0.25, -0.29,    0, 0.5, 1, 1,
-      -0.78, 0.25, -0.45,     0, 0.5, 1, 1,
-      -0.67, -0.25, -0.6,     0, 0.5, 1, 1,
-
-      -0.6, -0.25, -0.67,     0, 1, 0.5, 1,
-      -0.45, 0.25, -0.78,     0, 1, 0.5, 1,
-      -0.29, -0.25, -0.85,    0, 1, 0.5, 1,
-
-      -0.18, -0.25, -0.88,    1, 0, 0.5, 1,
-      0, 0.25, -0.9,          1, 0, 0.5, 1,
-      0.18, -0.25, -0.88,     1, 0, 0.5, 1,
-
-      0.29, -0.25, -0.85,     0.5, 1, 0, 1,
-      0.45, 0.25, -0.78,      0.5, 1, 0, 1,
-      0.6, -0.25, -0.67,      0.5, 1, 0, 1,
-
-      0.67, -0.25, -0.6,      0.5, 0, 1, 1,
-      0.78, 0.25, -0.45,      0.5, 0, 1, 1,
-      0.85, -0.25, -0.29,     0.5, 0, 1, 1
-    ];
+    this._vertexCount = vertices.length / 7;
 
     const buffer = this._gl.createBuffer();
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
@@ -191,7 +163,7 @@ class Triangles {
     this._gl.uniformMatrix4fv(transformMatrixLocation, false, this._matrix);
 
     this._gl.clear(this._gl.COLOR_BUFFER_BIT);
-    this._gl.drawArrays(this._gl.TRIANGLES, 0, this._vertexCount);
+    this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, this._vertexCount);
 
     requestAnimationFrame(this.draw);
   };
