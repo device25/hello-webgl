@@ -43,11 +43,12 @@ class Triangles {
       attribute vec4 coords;
       attribute float pointSize;
       uniform mat4 transformMatrix;
+      uniform mat4 perspectiveMatrix;
       attribute vec4 colors;
       varying vec4 varyingColors;
 
       void main(void) {
-        gl_Position = transformMatrix * coords;
+        gl_Position = perspectiveMatrix * transformMatrix * coords;
         gl_PointSize = pointSize;
         varyingColors = colors;
       }
@@ -163,6 +164,21 @@ class Triangles {
     const pointSize =
       this._gl.getAttribLocation(this._shaderProgram, 'pointSize');
     this._gl.vertexAttrib1f(pointSize, 20);
+
+    const perspectiveMatrix = window.mat4.create();
+    window.mat4.perspective(
+      perspectiveMatrix,
+      1,
+      this._canvas.width / this._canvas.height,
+      0.1,
+      11
+    );
+
+    const perspectiveLocation =
+      this._gl.getUniformLocation(this._shaderProgram, 'perspectiveMatrix');
+    this._gl.uniformMatrix4fv(perspectiveLocation, false, perspectiveMatrix);
+
+    window.mat4.translate(this._matrix, this._matrix, [0, 0, -2]);
   }
 
   draw = () => {
