@@ -35,7 +35,7 @@ class Triangles {
 
     this._gl.enable(this._gl.DEPTH_TEST);
     this._gl.viewport(0, 0, this._canvas.width, this._canvas.height);
-    this._gl.clearColor(0, 1, 1, 1);
+    this._gl.clearColor(0, 0, 0.6, 1);
   }
 
   _createShaders() {
@@ -82,24 +82,28 @@ class Triangles {
 
   _createVertices() {
     const vertices = [];
+    vertices.push(0, 0.9, 0.3, 1, 1, 1, 1);
 
-    for (let i = 0; i < 2; i += 0.01) {
-      vertices.push(i - 1);
-      vertices.push(-0.3);
-      vertices.push(Math.sin(i * 10) * 0.2);
-      vertices.push(i / 2);
-      vertices.push(0);
-      vertices.push(1 - i / 2);
-      vertices.push(1);
+    for (let i = 0; i < Math.PI * 2; i += 0.01) {
+      vertices.push(Math.cos(i));
+      vertices.push(Math.sin(i));
+      vertices.push(Math.sin(i * 10) * 0.1);
 
-      vertices.push(i - 1);
-      vertices.push(0.3);
-      vertices.push(Math.sin(i * 10) * 0.2);
-      vertices.push(0);
-      vertices.push(1 - i / 2);
-      vertices.push(i / 2);
+      vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
+      vertices.push(Math.sin(i * 8) * 0.5 + 0.5);
+      vertices.push(Math.sin(i * 12) * 0.5 + 0.5);
       vertices.push(1);
     }
+
+    const i = Math.PI * 2;
+    vertices.push(Math.cos(i));
+    vertices.push(Math.sin(i));
+    vertices.push(Math.sin(i * 10) * 0.1);
+
+    vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
+    vertices.push(Math.sin(i * 8) * 0.5 + 0.5);
+    vertices.push(Math.sin(i * 12) * 0.5 + 0.5);
+    vertices.push(1);
 
     this._vertexCount = vertices.length / 7;
 
@@ -163,7 +167,7 @@ class Triangles {
     this._gl.uniformMatrix4fv(transformMatrixLocation, false, this._matrix);
 
     this._gl.clear(this._gl.COLOR_BUFFER_BIT);
-    this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, this._vertexCount);
+    this._gl.drawArrays(this._gl.TRIANGLE_FAN, 0, this._vertexCount);
 
     requestAnimationFrame(this.draw);
   };
