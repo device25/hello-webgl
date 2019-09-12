@@ -9,6 +9,7 @@ class Triangles {
     this._initGL();
     this._createShaders();
     this._createVertices();
+    this._createIndices();
   }
 
   _initGL() {
@@ -35,7 +36,7 @@ class Triangles {
 
     this._gl.enable(this._gl.DEPTH_TEST);
     this._gl.viewport(0, 0, this._canvas.width, this._canvas.height);
-    this._gl.clearColor(0, 0, 0.6, 1);
+    this._gl.clearColor(0, 1, 1, 1);
   }
 
   _createShaders() {
@@ -81,29 +82,16 @@ class Triangles {
   }
 
   _createVertices() {
-    const vertices = [];
-    vertices.push(0, 0.9, 0.3, 1, 1, 1, 1);
-
-    for (let i = 0; i < Math.PI * 2; i += 0.01) {
-      vertices.push(Math.cos(i));
-      vertices.push(Math.sin(i));
-      vertices.push(Math.sin(i * 10) * 0.1);
-
-      vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
-      vertices.push(Math.sin(i * 8) * 0.5 + 0.5);
-      vertices.push(Math.sin(i * 12) * 0.5 + 0.5);
-      vertices.push(1);
-    }
-
-    const i = Math.PI * 2;
-    vertices.push(Math.cos(i));
-    vertices.push(Math.sin(i));
-    vertices.push(Math.sin(i * 10) * 0.1);
-
-    vertices.push(Math.sin(i * 10) * 0.5 + 0.5);
-    vertices.push(Math.sin(i * 8) * 0.5 + 0.5);
-    vertices.push(Math.sin(i * 12) * 0.5 + 0.5);
-    vertices.push(1);
+    const vertices = [
+      -1, -1, -1,     1, 0, 0, 1,     // 0
+      1, -1, -1,     1, 1, 0, 1,     // 1
+      -1,  1, -1,     0, 1, 1, 1,     // 2
+      1,  1, -1,     0, 0, 1, 1,     // 3
+      -1,  1,  1,     1, 0.5, 0, 1,   // 4
+      1,  1,  1,     0.5, 1, 1, 1,   // 5
+      -1, -1,  1,     1, 0, 0.5, 1,   // 6
+      1, -1,  1,     0.5, 0, 1, 1   // 7
+    ];
 
     this._vertexCount = vertices.length / 7;
 
@@ -154,20 +142,46 @@ class Triangles {
       this._gl.getUniformLocation(this._shaderProgram, 'perspectiveMatrix');
     this._gl.uniformMatrix4fv(perspectiveLocation, false, perspectiveMatrix);
 
-    window.mat4.translate(this._matrix, this._matrix, [0, 0, -2]);
+    window.mat4.translate(this._matrix, this._matrix, [0, 0, -4]);
+  }
+
+  _createIndices() {
+    const indices = [
+      0, 1, 2,   1, 2, 3,
+      2, 3, 4,   3, 4, 5,
+      4, 5, 6,   5, 6, 7,
+      6, 7, 0,   7, 0, 1,
+      0, 2, 6,   2, 6, 4,
+      1, 3, 7,   3, 7, 5
+    ];
+    this._indexCount = indices.length;
+
+    const indexBuffer = this._gl.createBuffer();
+    this._gl.bindBuffer(this._gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    this._gl.bufferData(
+      this._gl.ELEMENT_ARRAY_BUFFER,
+      new Uint8Array(indices),
+      this._gl.STATIC_DRAW
+    );
   }
 
   draw = () => {
-    window.mat4.rotateX(this._matrix, this._matrix, 0.01);
+    window.mat4.rotateX(this._matrix, this._matrix, 0.004);
     window.mat4.rotateY(this._matrix, this._matrix, 0.01);
-    window.mat4.rotateZ(this._matrix, this._matrix, 0.01);
+    window.mat4.rotateZ(this._matrix, this._matrix, 0.007);
 
     const transformMatrixLocation =
       this._gl.getUniformLocation(this._shaderProgram, 'transformMatrix');
     this._gl.uniformMatrix4fv(transformMatrixLocation, false, this._matrix);
 
     this._gl.clear(this._gl.COLOR_BUFFER_BIT);
-    this._gl.drawArrays(this._gl.TRIANGLE_FAN, 0, this._vertexCount);
+    // this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, this._vertexCount);
+    this._gl.drawElements(
+      this._gl.TRIANGLES,
+      this._indexCount,
+      this._gl.UNSIGNED_BYTE,
+      0
+    );
 
     requestAnimationFrame(this.draw);
   };
