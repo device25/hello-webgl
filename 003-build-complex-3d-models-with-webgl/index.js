@@ -4,13 +4,13 @@ class Triangles {
   constructor(props) {
     this._canvas = props.canvas;
     this._gl = this._canvas.getContext('webgl');
-    // this._vertexCount = props.vertexCount;
+    this._vertexCount = props.vertexCount;
 
     this._initGL();
     this._createShaders();
     this._createVertices();
-    // this._createIndices();
-    this._loadTexture();
+    this._createIndices();
+    // this._loadTexture();
   }
 
   _initGL() {
@@ -48,14 +48,11 @@ class Triangles {
       uniform mat4 perspectiveMatrix;
       attribute vec4 colors;
       varying vec4 varyingColors;
-      attribute vec2 textureCoords;
-      varying vec2 varyingTextureCoords;
 
       void main(void) {
         gl_Position = perspectiveMatrix * transformMatrix * coords;
         gl_PointSize = pointSize;
         varyingColors = colors;
-        varyingTextureCoords = textureCoords;
       }
     `;
 
@@ -68,11 +65,9 @@ class Triangles {
       precision mediump float;
       uniform vec4 colors;
       varying vec4 varyingColors;
-      varying vec2 varyingTextureCoords;
-      uniform sampler2D sampler;
       
       void main(void) {
-        gl_FragColor = texture2D(sampler, varyingTextureCoords);
+        gl_FragColor = varyingColors;
       }
     `;
 
@@ -89,13 +84,17 @@ class Triangles {
 
   _createVertices() {
     const vertices = [
-      -1, -1, 0, 0,
-      1, -1, 1, 0,
-      -1, 1, 0, 1,
-      1, 1, 1, 1
+      -1, -1, -1,     1, 0, 0, 1,     // 0
+      1, -1, -1,     1, 1, 0, 1,     // 1
+      -1,  1, -1,     0, 1, 1, 1,     // 2
+      1,  1, -1,     0, 0, 1, 1,     // 3
+      -1,  1,  1,     1, 0.5, 0, 1,   // 4
+      1,  1,  1,     0.5, 1, 1, 1,   // 5
+      -1, -1,  1,     1, 0, 0.5, 1,   // 6
+      1, -1,  1,     0.5, 0, 1, 1   // 7
     ];
 
-    this._vertexCount = vertices.length / 4;
+    this._vertexCount = vertices.length / 7;
 
     const buffer = this._gl.createBuffer();
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
@@ -106,25 +105,25 @@ class Triangles {
       this._gl.getAttribLocation(this._shaderProgram, 'coords');
     this._gl.vertexAttribPointer(
       coordsLocation,
-      2,
+      3,
       this._gl.FLOAT,
       false,
-      Float32Array.BYTES_PER_ELEMENT * 4,
+      Float32Array.BYTES_PER_ELEMENT * 7,
       0
     );
     this._gl.enableVertexAttribArray(coordsLocation);
 
-    const textureCoordsLocation =
-      this._gl.getAttribLocation(this._shaderProgram, 'textureCoords');
+    const colorsLocation =
+      this._gl.getAttribLocation(this._shaderProgram, 'colors');
     this._gl.vertexAttribPointer(
-      textureCoordsLocation,
-      2,
+      colorsLocation,
+      4,
       this._gl.FLOAT,
       false,
-      Float32Array.BYTES_PER_ELEMENT * 4,
-      Float32Array.BYTES_PER_ELEMENT * 2
+      Float32Array.BYTES_PER_ELEMENT * 7,
+      Float32Array.BYTES_PER_ELEMENT * 3
     );
-    this._gl.enableVertexAttribArray(textureCoordsLocation);
+    this._gl.enableVertexAttribArray(colorsLocation);
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, null);
 
     const pointSize =
@@ -147,55 +146,55 @@ class Triangles {
     window.mat4.translate(this._matrix, this._matrix, [0, 0, -4]);
   }
 
-  // _createIndices() {
-  //   const indices = [
-  //     0, 1, 2,   1, 2, 3,
-  //     2, 3, 4,   3, 4, 5,
-  //     4, 5, 6,   5, 6, 7,
-  //     6, 7, 0,   7, 0, 1,
-  //     0, 2, 6,   2, 6, 4,
-  //     1, 3, 7,   3, 7, 5
-  //   ];
-  //   this._indexCount = indices.length;
-  //
-  //   const indexBuffer = this._gl.createBuffer();
-  //   this._gl.bindBuffer(this._gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-  //   this._gl.bufferData(
-  //     this._gl.ELEMENT_ARRAY_BUFFER,
-  //     new Uint8Array(indices),
-  //     this._gl.STATIC_DRAW
-  //   );
-  // }
+  _createIndices() {
+    const indices = [
+      0, 1, 2,   1, 2, 3,
+      2, 3, 4,   3, 4, 5,
+      4, 5, 6,   5, 6, 7,
+      6, 7, 0,   7, 0, 1,
+      0, 2, 6,   2, 6, 4,
+      1, 3, 7,   3, 7, 5
+    ];
+    this._indexCount = indices.length;
 
-  _loadTexture() {
-    const image = document.createElement('img');
-    image.crossOrigin = '';
-    image.addEventListener('load', () => {
-      const texture = this._gl.createTexture();
-      const samplerLocation =
-        this._gl.getUniformLocation(this._shaderProgram, 'sampler');
-
-      this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1);
-      this._gl.activeTexture(this._gl.TEXTURE0);
-      this._gl.bindTexture(this._gl.TEXTURE_2D, texture);
-      // learn more about texParameteri
-      this._gl.texParameteri(
-        this._gl.TEXTURE_2D,
-        this._gl.TEXTURE_MIN_FILTER,
-        this._gl.LINEAR
-      );
-      this._gl.texImage2D(
-        this._gl.TEXTURE_2D,
-        0,
-        this._gl.RGB,
-        this._gl.RGB,
-        this._gl.UNSIGNED_BYTE,
-        image
-      );
-      this._gl.uniform1i(samplerLocation, 0);
-    });
-    image.src = 'https://pbs.twimg.com/profile_images/664169149002874880/z1fmxo00.jpg';
+    const indexBuffer = this._gl.createBuffer();
+    this._gl.bindBuffer(this._gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    this._gl.bufferData(
+      this._gl.ELEMENT_ARRAY_BUFFER,
+      new Uint8Array(indices),
+      this._gl.STATIC_DRAW
+    );
   }
+
+  // _loadTexture() {
+  //   const image = document.createElement('img');
+  //   image.crossOrigin = '';
+  //   image.addEventListener('load', () => {
+  //     const texture = this._gl.createTexture();
+  //     const samplerLocation =
+  //       this._gl.getUniformLocation(this._shaderProgram, 'sampler');
+  //
+  //     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1);
+  //     this._gl.activeTexture(this._gl.TEXTURE0);
+  //     this._gl.bindTexture(this._gl.TEXTURE_2D, texture);
+  //     // learn more about texParameteri
+  //     this._gl.texParameteri(
+  //       this._gl.TEXTURE_2D,
+  //       this._gl.TEXTURE_MIN_FILTER,
+  //       this._gl.LINEAR
+  //     );
+  //     this._gl.texImage2D(
+  //       this._gl.TEXTURE_2D,
+  //       0,
+  //       this._gl.RGB,
+  //       this._gl.RGB,
+  //       this._gl.UNSIGNED_BYTE,
+  //       image
+  //     );
+  //     this._gl.uniform1i(samplerLocation, 0);
+  //   });
+  //   image.src = 'https://pbs.twimg.com/profile_images/664169149002874880/z1fmxo00.jpg';
+  // }
 
   draw = () => {
     window.mat4.rotateX(this._matrix, this._matrix, 0.004);
@@ -207,21 +206,21 @@ class Triangles {
     this._gl.uniformMatrix4fv(transformMatrixLocation, false, this._matrix);
 
     this._gl.clear(this._gl.COLOR_BUFFER_BIT);
-    this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, this._vertexCount);
-    // this._gl.drawElements(
-    //   this._gl.TRIANGLES,
-    //   this._indexCount,
-    //   this._gl.UNSIGNED_BYTE,
-    //   0
-    // );
+    // this._gl.drawArrays(this._gl.TRIANGLE_STRIP, 0, this._vertexCount);
+    this._gl.drawElements(
+      this._gl.TRIANGLES,
+      this._indexCount,
+      this._gl.UNSIGNED_BYTE,
+      0
+    );
 
     requestAnimationFrame(this.draw);
   };
 }
 
 const props = {
-  canvas: document.getElementById('canvas')
-  // vertexCount: 36
+  canvas: document.getElementById('canvas'),
+  vertexCount: 36
 };
 
 const triangles = new Triangles(props);
