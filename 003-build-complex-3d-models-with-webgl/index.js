@@ -37,23 +37,28 @@ class Triangles {
 
     this._gl.enable(this._gl.DEPTH_TEST);
     this._gl.viewport(0, 0, this._canvas.width, this._canvas.height);
-    this._gl.clearColor(0, 1, 1, 1);
+    this._gl.clearColor(0, 0, 0, 1);
   }
 
   _createShaders() {
     const vertexSource = `
       attribute vec4 coords;
-      attribute float pointSize;
       uniform mat4 transformMatrix;
+      attribute vec3 normal;
+      uniform vec3 lightColor;
+      uniform vec3 lightDirection;
       uniform mat4 perspectiveMatrix;
-      attribute vec4 colors;
       varying vec4 varyingColors;
 
       void main(void) {
+        vec3 norm = normalize(normal);
+        vec3 ld = normalize(lightDirection);
+        float dotProduct = max(dot(norm, ld), 0.0);
+        vec3 vertexColor = lightColor * vec3(1, 1, 0) * dotProduct;
+        varyingColors = vec4(vertexColor, 1.0);
+        
         gl_Position = perspectiveMatrix * transformMatrix * coords;
-        gl_PointSize = pointSize;
-        varyingColors = colors;
-      }
+      }  
     `;
 
     const vertexShader = this._gl.createShader(this._gl.VERTEX_SHADER);
@@ -63,7 +68,6 @@ class Triangles {
     // mediump NOT medium
     const fragmentSource = `
       precision mediump float;
-      uniform vec4 colors;
       varying vec4 varyingColors;
       
       void main(void) {
@@ -84,17 +88,17 @@ class Triangles {
 
   _createVertices() {
     const vertices = [
-      -1, -1, -1,     1, 0, 0, 1,     // 0
-      1, -1, -1,     1, 1, 0, 1,     // 1
-      -1,  1, -1,     0, 1, 1, 1,     // 2
-      1,  1, -1,     0, 0, 1, 1,     // 3
-      -1,  1,  1,     1, 0.5, 0, 1,   // 4
-      1,  1,  1,     0.5, 1, 1, 1,   // 5
-      -1, -1,  1,     1, 0, 0.5, 1,   // 6
-      1, -1,  1,     0.5, 0, 1, 1   // 7
+      -1, -1, -1, // 0
+      1, -1, -1,  // 1
+      -1, 1, -1, // 2
+      1, 1, -1,  // 3
+      -1, 1, 1, // 4
+      1, 1, 1,  // 5
+      -1, -1, 1, // 6
+      1, -1, 1  // 7
     ];
 
-    this._vertexCount = vertices.length / 7;
+    this._vertexCount = vertices.length / 3;
 
     const buffer = this._gl.createBuffer();
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
@@ -104,31 +108,42 @@ class Triangles {
     const coordsLocation =
       this._gl.getAttribLocation(this._shaderProgram, 'coords');
     this._gl.vertexAttribPointer(
-      coordsLocation,
-      3,
-      this._gl.FLOAT,
-      false,
-      Float32Array.BYTES_PER_ELEMENT * 7,
-      0
+      coordsLocation, 3, this._gl.FLOAT, false, 0, 0
     );
     this._gl.enableVertexAttribArray(coordsLocation);
 
-    const colorsLocation =
-      this._gl.getAttribLocation(this._shaderProgram, 'colors');
-    this._gl.vertexAttribPointer(
-      colorsLocation,
-      4,
-      this._gl.FLOAT,
-      false,
-      Float32Array.BYTES_PER_ELEMENT * 7,
-      Float32Array.BYTES_PER_ELEMENT * 3
+    const normals = [
+      0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
+      0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+      0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+      0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+      -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+      1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0
+    ];
+
+    const normalBuffer = this._gl.createBuffer();
+    this._gl.bindBuffer(this._gl.ARRAY_BUFFER, normalBuffer);
+    this._gl.bufferData(
+      this._gl.ARRAY_BUFFER,
+      new Float32Array(normals),
+      this._gl.STATIC_DRAW
     );
-    this._gl.enableVertexAttribArray(colorsLocation);
+
+    const normalLocation =
+      this._gl.getAttribLocation(this._shaderProgram, 'normal');
+    this._gl.vertexAttribPointer(
+      normalLocation, 3, this._gl.FLOAT, false, 0, 0
+    );
+    this._gl.enableVertexAttribArray(normalLocation);
+
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, null);
 
-    const pointSize =
-      this._gl.getAttribLocation(this._shaderProgram, 'pointSize');
-    this._gl.vertexAttrib1f(pointSize, 20);
+    const lightColorLocation =
+      this._gl.getUniformLocation(this._shaderProgram, 'lightColor');
+    this._gl.uniform3f(lightColorLocation, 1, 1, 1);
+    const lightDirectionLocation =
+      this._gl.getUniformLocation(this._shaderProgram, 'lightDirection');
+    this._gl.uniform3f(lightDirectionLocation, 0.5, 1.0, 0.1);
 
     const perspectiveMatrix = window.mat4.create();
     window.mat4.perspective(
@@ -148,12 +163,12 @@ class Triangles {
 
   _createIndices() {
     const indices = [
-      0, 1, 2,   1, 2, 3,
-      2, 3, 4,   3, 4, 5,
-      4, 5, 6,   5, 6, 7,
-      6, 7, 0,   7, 0, 1,
-      0, 2, 6,   2, 6, 4,
-      1, 3, 7,   3, 7, 5
+      0, 1, 2, 1, 2, 3,
+      2, 3, 4, 3, 4, 5,
+      4, 5, 6, 5, 6, 7,
+      6, 7, 0, 7, 0, 1,
+      0, 2, 6, 2, 6, 4,
+      1, 3, 7, 3, 7, 5
     ];
     this._indexCount = indices.length;
 
@@ -165,36 +180,6 @@ class Triangles {
       this._gl.STATIC_DRAW
     );
   }
-
-  // _loadTexture() {
-  //   const image = document.createElement('img');
-  //   image.crossOrigin = '';
-  //   image.addEventListener('load', () => {
-  //     const texture = this._gl.createTexture();
-  //     const samplerLocation =
-  //       this._gl.getUniformLocation(this._shaderProgram, 'sampler');
-  //
-  //     this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, 1);
-  //     this._gl.activeTexture(this._gl.TEXTURE0);
-  //     this._gl.bindTexture(this._gl.TEXTURE_2D, texture);
-  //     // learn more about texParameteri
-  //     this._gl.texParameteri(
-  //       this._gl.TEXTURE_2D,
-  //       this._gl.TEXTURE_MIN_FILTER,
-  //       this._gl.LINEAR
-  //     );
-  //     this._gl.texImage2D(
-  //       this._gl.TEXTURE_2D,
-  //       0,
-  //       this._gl.RGB,
-  //       this._gl.RGB,
-  //       this._gl.UNSIGNED_BYTE,
-  //       image
-  //     );
-  //     this._gl.uniform1i(samplerLocation, 0);
-  //   });
-  //   image.src = 'https://pbs.twimg.com/profile_images/664169149002874880/z1fmxo00.jpg';
-  // }
 
   draw = () => {
     window.mat4.rotateX(this._matrix, this._matrix, 0.004);
