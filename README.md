@@ -1,10 +1,10 @@
 # Hello WebGL
 
-[WebGL Fundamentals](https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html) [src](./src/001-webgl-fundamentals) [build](https://device25.github.io/hello-webgl/src/001-webgl-fundamentals)
+[WebGL Fundamentals](https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html) ([src](./src/001-webgl-fundamentals), [build](https://device25.github.io/hello-webgl/src/001-webgl-fundamentals))
 
-[Create 3D Graphics in JavaScript Using WebGL](https://egghead.io/lessons/webgl-setting-up-webgl) [src](./src/002-egghead-course) [build](https://device25.github.io/hello-webgl/src/002-egghead-course)
+[Create 3D Graphics in JavaScript Using WebGL](https://egghead.io/lessons/webgl-setting-up-webgl) ([src](./src/002-egghead-course), [build](https://device25.github.io/hello-webgl/src/002-egghead-course))
 
-[Build Complex 3D models with WebGL](https://egghead.io/courses/build-complex-3d-models-with-webgl) [src](./src/003-build-complex-3d-models-with-webgl) [build](https://device25.github.io/hello-webgl/src/003-build-complex-3d-models-with-webgl)
+[Build Complex 3D models with WebGL](https://egghead.io/courses/build-complex-3d-models-with-webgl) ([src](./src/003-build-complex-3d-models-with-webgl), [build](https://device25.github.io/hello-webgl/src/003-build-complex-3d-models-with-webgl))
 
 ## Development
 
