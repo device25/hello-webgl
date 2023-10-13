@@ -9,8 +9,8 @@
 ## Development
 
 ```shell
-npm ci
-npm run start
+yarn
+yarn vite ./src/...
 ```
 
 ## How To
@@ -22,7 +22,7 @@ npm run start
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Hello WebGL</title>
   </head>
   <body>
@@ -34,13 +34,13 @@ npm run start
 
 ```js
 // main.js
-const canvas = document.getElementById('canvas');
-const gl = canvas.getContext('webgl');
+const canvas = document.getElementById("canvas");
+const gl = canvas.getContext("webgl");
 ```
 
 ### Create Program
 
-This simple program will draw red 10 pixel dot at the center of canvas. 
+This simple program will draw red 10 pixel dot at the center of canvas.
 
 ```js
 const vertexSource = `

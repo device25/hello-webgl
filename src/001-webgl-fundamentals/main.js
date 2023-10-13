@@ -11,7 +11,6 @@ function resize(gl) {
 
   //  проверяем, отличается ли размер canvas
   if (gl.canvas.width !== displayWidth || gl.canvas.height !== displayHeight) {
-
     // подгоняем размер буфера отрисовки под размер HTML-элемента
     gl.canvas.width = displayWidth;
     gl.canvas.height = displayHeight;
@@ -78,41 +77,43 @@ function setRectangle(gl, x, y, width, height) {
    * несколько буферов, нам бы потребовалось привязать их сначала к
    * `ARRAY_BUFFER`.
    */
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-    x1, y1,
-    x2, y1,
-    x1, y2,
-    x1, y2,
-    x2, y1,
-    x2, y2]), gl.STATIC_DRAW);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]),
+    gl.STATIC_DRAW,
+  );
 }
 
 async function main() {
-  const canvas = document.getElementById('c');
-  const gl = canvas.getContext('webgl');
+  const canvas = document.getElementById("c");
+  const gl = canvas.getContext("webgl");
 
   if (!gl) {
-    console.log('webgl not supported');
+    console.log("webgl not supported");
     return;
   }
 
-  const vertexShaderSource = await fetch('./index.vertex.glsl')
-    .then(res => res.text());
-  const fragmentShaderSource = await fetch('./index.fragment.glsl')
-    .then(res => res.text());
+  const vertexShaderSource = await fetch("./index.vertex.glsl").then((res) =>
+    res.text(),
+  );
+  const fragmentShaderSource = await fetch("./index.fragment.glsl").then(
+    (res) => res.text(),
+  );
 
-  const vertexShader =
-    createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-  const fragmentShader =
-    createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+  const fragmentShader = createShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    fragmentShaderSource,
+  );
 
   const program = createProgram(gl, vertexShader, fragmentShader);
-  const positionAttributeLocation =
-    gl.getAttribLocation(program, 'a_position');
-  const resolutionUniformLocation =
-    gl.getUniformLocation(program, 'u_resolution');
-  const colorUniformLocation =
-    gl.getUniformLocation(program, 'u_color');
+  const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+  const resolutionUniformLocation = gl.getUniformLocation(
+    program,
+    "u_resolution",
+  );
+  const colorUniformLocation = gl.getUniformLocation(program, "u_color");
 
   const positionBuffer = gl.createBuffer();
 
@@ -155,10 +156,15 @@ async function main() {
   // начинать с начала буфера
   const offset = 0;
   gl.vertexAttribPointer(
-    positionAttributeLocation, size, type, normalize, stride, offset
+    positionAttributeLocation,
+    size,
+    type,
+    normalize,
+    stride,
+    offset,
   );
 
-  const inputValue = document.getElementById('input');
+  const inputValue = document.getElementById("input");
 
   /**
    * в каждом кадре создаём прямоугольники в произвольных местах со случайным
@@ -171,7 +177,7 @@ async function main() {
   function drawRect() {
     window.requestAnimationFrame(drawRect);
 
-    const interval = 1000 / document.getElementById('fpsInput').value;
+    const interval = 1000 / document.getElementById("fpsInput").value;
     now = Date.now();
     delta = now - then;
 
@@ -182,12 +188,20 @@ async function main() {
         // так как он был привязан последник к
         // точке связи ARRAY_BUFFER
         setRectangle(
-          gl, randomInt(300), randomInt(300), randomInt(300), randomInt(300)
+          gl,
+          randomInt(300),
+          randomInt(300),
+          randomInt(300),
+          randomInt(300),
         );
 
         // задаём случайный цвет
         gl.uniform4f(
-          colorUniformLocation, Math.random(), Math.random(), Math.random(), 1
+          colorUniformLocation,
+          Math.random(),
+          Math.random(),
+          Math.random(),
+          1,
         );
 
         // отрисовка прямоугольника
