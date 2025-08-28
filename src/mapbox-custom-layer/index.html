@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Custom layer (line strip)</title>
+    <title>Mapbox Custom Layer</title>
     <meta
       name="viewport"
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
@@ -91,11 +91,9 @@
             console.error(gl.getProgramInfoLog(this.program));
           }
 
-          // атрибуты/юниформы
           this.aPos = gl.getAttribLocation(this.program, "a_pos");
           this.uMatrix = gl.getUniformLocation(this.program, "u_matrix");
 
-          // координаты в меркатор-единицах карты
           const helsinki = mapboxgl.MercatorCoordinate.fromLngLat({
             lng: 25.004,
             lat: 60.239,
@@ -109,7 +107,6 @@
             lat: 50.541,
           });
 
-          // буфер вершин
           this.buffer = gl.createBuffer();
           gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
           gl.bufferData(
@@ -125,7 +122,6 @@
             gl.STATIC_DRAW,
           );
 
-          // VAO собираем один раз
           this.vao = gl.createVertexArray();
           gl.bindVertexArray(this.vao);
           gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
@@ -137,7 +133,6 @@
 
         /**
          * @param {WebGL2RenderingContext} gl
-         * @param {Float32Array} matrix
          * */
         render(gl, matrix) {
           gl.useProgram(this.program);
