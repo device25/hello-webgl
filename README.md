@@ -79,3 +79,4 @@ gl.drawArrays(gl.POINTS, 0, 1);
 - [WebGL Fundamentals](./src/webgl-fundamentals) ([course](https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html))
 - [Create 3D Graphics in JavaScript Using WebGL](./src/create-3d-graphics-in-javascript-using-webgl) ([course](https://egghead.io/lessons/webgl-setting-up-webgl))
 - [Build Complex 3D models with WebGL](./src/build-complex-3d-models-with-webgl) ([course](https://egghead.io/courses/build-complex-3d-models-with-webgl))
+- [Mapbox Custom Layer](./src/mapbox-custom-layer) - Example of creating a custom WebGL2 layer in Mapbox GL JS
