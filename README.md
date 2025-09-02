@@ -1,16 +1,26 @@
-## Development
+# Hello WebGL
+
+A collection of WebGL examples and projects.
+
+## Getting Started
+
+### Installation
 
 ```shell
 yarn
+```
+
+### Development
+
+```shell
 yarn vite ./src/...
 ```
 
-## How To
+## Basic WebGL Example
 
-### Init WebGL Context
+### 1. Setup HTML
 
 ```html
-<!-- index.html -->
 <!doctype html>
 <html lang="en">
   <head>
@@ -24,15 +34,16 @@ yarn vite ./src/...
 </html>
 ```
 
+### 2. Initialize WebGL Context
+
 ```js
-// main.js
 const canvas = document.getElementById("canvas");
 const gl = canvas.getContext("webgl");
 ```
 
-### Create Program
+### 3. Create Shader Program
 
-This simple program will draw red 10 pixel dot at the center of canvas.
+This program draws a red 10-pixel dot at the center of the canvas.
 
 ```js
 const vertexSource = `
@@ -41,11 +52,6 @@ const vertexSource = `
     gl_PointSize = 10.0;
   }
 `;
-const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-
-gl.shaderSource(vertexShader, vertexSource);
-gl.compileShader(vertexShader);
-
 const fragmentSource = `
   precision mediump float;  
 
@@ -53,11 +59,18 @@ const fragmentSource = `
     gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
   }
 `;
-const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 
+// Create vertex shader
+const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+gl.shaderSource(vertexShader, vertexSource);
+gl.compileShader(vertexShader);
+
+// Create fragment shader
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fragmentShader, fragmentSource);
 gl.compileShader(fragmentShader);
 
+// Link shaders into program
 const shaderProgram = gl.createProgram();
 gl.attachShader(shaderProgram, vertexShader);
 gl.attachShader(shaderProgram, fragmentShader);
@@ -65,9 +78,7 @@ gl.linkProgram(shaderProgram);
 gl.useProgram(shaderProgram);
 ```
 
-### Draw Arrays
-
-Clear canvas and draw one point.
+### 4. Render
 
 ```js
 gl.clear(gl.COLOR_BUFFER_BIT);
@@ -76,7 +87,15 @@ gl.drawArrays(gl.POINTS, 0, 1);
 
 ## Projects
 
-- [WebGL Fundamentals](./src/webgl-fundamentals) ([course](https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html))
-- [Create 3D Graphics in JavaScript Using WebGL](./src/create-3d-graphics-in-javascript-using-webgl) ([course](https://egghead.io/lessons/webgl-setting-up-webgl))
-- [Build Complex 3D models with WebGL](./src/build-complex-3d-models-with-webgl) ([course](https://egghead.io/courses/build-complex-3d-models-with-webgl))
-- [Mapbox Custom Layer](./src/mapbox-custom-layer) - Example of creating a custom WebGL2 layer in Mapbox GL JS
+### Tutorials
+
+- [WebGL Fundamentals](./src/webgl-fundamentals)
+  - Based on [webglfundamentals.org](https://webglfundamentals.org/webgl/lessons/webgl-fundamentals.html)
+- [Create 3D Graphics in JavaScript Using WebGL](./src/create-3d-graphics-in-javascript-using-webgl)
+  - Based on [Egghead.io course](https://egghead.io/lessons/webgl-setting-up-webgl)
+- [Build Complex 3D models with WebGL](./src/build-complex-3d-models-with-webgl)
+  - Based on [Egghead.io course](https://egghead.io/courses/build-complex-3d-models-with-webgl)
+
+### Examples
+
+- [Mapbox Custom Layer](./src/mapbox-custom-layer) - Custom WebGL2 layer implementation for Mapbox GL JS
