@@ -26,64 +26,118 @@
   <body>
     <canvas id="canvas"></canvas>
     <script>
-      // Get WebGL2 context
+      // WebGL2 context initialization with error checking
       const canvas = document.getElementById("canvas");
-      /** @type {WebGL2RenderingContext} gl */
+      /** @type {WebGL2RenderingContext} */
       const gl = canvas.getContext("webgl2");
+      if (!gl) {
+        throw new Error("WebGL2 not supported");
+      }
 
-      // Shader compilation
+      // Shader source code
       const vertexShaderSource = `#version 300 es
       in vec2 pos;
-      in float size;
+      in vec3 inColor;
+
+      out vec3 fragColor;
 
       void main() {
+        fragColor = inColor;
+
         // Coordinates x, y, z.
         // W is the scale factor.
         // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#homogeneous_coordinates
         gl_Position = vec4(pos, 0.0, 1.0);
-        gl_PointSize = size;
       }`;
       const fragmentShaderSource = `#version 300 es
       precision highp float;
+      in vec3 fragColor;
+
       out vec4 outColor;
 
       void main() {
-        outColor = vec4(1.0, 0.0, 0.0, 1.0);
+        // rgb alpha
+        outColor = vec4(fragColor, 1.0);
       }`;
-      const vs = gl.createShader(gl.VERTEX_SHADER);
-      gl.shaderSource(vs, vertexShaderSource);
-      gl.compileShader(vs);
-      if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
-        console.error(
-          "Vertex shader failed to compile:",
-          gl.getShaderInfoLog(vs),
-        );
-      }
-      const fs = gl.createShader(gl.FRAGMENT_SHADER);
-      gl.shaderSource(fs, fragmentShaderSource);
-      gl.compileShader(fs);
-      if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
-        console.error(
-          "Fragment shader failed to compile:",
-          gl.getShaderInfoLog(fs),
-        );
-      }
 
-      // Program linking
+      // Helper function for shader compilation
+      const createShader = (type, source) => {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          const error = gl.getShaderInfoLog(shader);
+          gl.deleteShader(shader);
+
+          throw new Error(`Shader compilation failed: ${error}`);
+        }
+
+        return shader;
+      };
+
+      // Shader compilation
+      const vs = createShader(gl.VERTEX_SHADER, vertexShaderSource);
+      const fs = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+      // Program linking with error checking
       const program = gl.createProgram();
       gl.attachShader(program, vs);
       gl.attachShader(program, fs);
       gl.linkProgram(program);
       if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error("Program failed to link:", gl.getProgramInfoLog(program));
+        const error = gl.getProgramInfoLog(program);
+        gl.deleteProgram(program);
+
+        throw new Error(`Program linking failed: ${error}`);
       }
+
+      // Cleanup shaders after linking
+      gl.detachShader(program, vs);
+      gl.detachShader(program, fs);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+
+      let vertices = [
+        // first triangle
+        // first vertex
+        -1.0, -1.0,
+        // second vertex
+        1.0, -1.0,
+        // third vertex
+        -1.0, 1.0,
+        // second triangle
+        // first vertex
+        1.0, 1.0,
+        // second vertex
+        1.0, -1.0,
+        // third vertex
+        -1.0, 1.0,
+      ];
+
+      let colors = [
+        // first triangle
+        // first vertex
+        1.0, 0.85, 0.0,
+        // second vertex
+        1.0, 0.85, 0.0,
+        // third vertex
+        1.0, 0.85, 0.0,
+        // second triangle
+        // first vertex
+        0.76, 0.98, 0.96,
+        // second vertex
+        0.76, 0.98, 0.96,
+        // third vertex
+        0.76, 0.98, 0.96,
+      ];
 
       // attribute setup
       const positionBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
       gl.bufferData(
         gl.ARRAY_BUFFER,
-        new Float32Array([0.0, 0.0]),
+        new Float32Array(vertices),
         gl.STATIC_DRAW,
       );
       const positionAttributeLocation = gl.getAttribLocation(program, "pos");
@@ -96,24 +150,39 @@
         0, // stride (0 = auto)
         0, // offset
       );
-      const sizeBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([50.0]), gl.STATIC_DRAW);
-      const sizeAttributeLocation = gl.getAttribLocation(program, "size");
-      gl.enableVertexAttribArray(sizeAttributeLocation);
+      const colorBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+      const colorAttributeLocation = gl.getAttribLocation(program, "inColor");
+      gl.enableVertexAttribArray(colorAttributeLocation);
       gl.vertexAttribPointer(
-        sizeAttributeLocation,
-        1, // size (num components)
+        colorAttributeLocation,
+        3, // size (num components)
         gl.FLOAT, // type of data in buffer
         false, // normalize
         0, // stride (0 = auto)
         0, // offset
       );
 
-      // Render function
+      // Cleanup function
+      const cleanup = () => {
+        gl.deleteBuffer(positionBuffer);
+        gl.deleteBuffer(colorBuffer);
+        gl.deleteProgram(program);
+      };
+
+      // Add cleanup on page unload
+      window.addEventListener("unload", cleanup);
+
+      // Render function with error checking
       const render = () => {
         gl.useProgram(program);
-        gl.drawArrays(gl.POINTS, 0, 1);
+        const error = gl.getError();
+        if (error !== gl.NO_ERROR) {
+          console.error("WebGL error:", error);
+          return;
+        }
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
       };
 
       // Set up canvas size and viewport
@@ -131,43 +200,32 @@
       window.addEventListener("resize", resize);
 
       // interaction
-      const onMouseMove = () => {
-        // check if mouse is pressed
-        if (window.event.buttons !== 1) {
-          return;
-        }
-
+      const onMouseClick = (
+        /** @type {PointerEvent} */
+        event,
+      ) => {
         //normalized device coordinates
         const coordinates = [
-          (window.event.clientX / window.innerWidth) * 2 - 1,
-          (window.event.clientY / window.innerHeight) * -2 + 1,
+          (event.clientX / window.innerWidth) * 2 - 1,
+          (event.clientY / window.innerHeight) * -2 + 1,
         ];
 
-        // Calculate distance from center (0,0) to determine point size
-        // formula: distance = sqrt(x^2 + y^2)
-        const distance = Math.sqrt(
-          coordinates[0] * coordinates[0] + coordinates[1] * coordinates[1],
-        );
-        // Size decreases as point moves away from center
-        // Max size 50, min size 0
-        const size = (1 - distance) * 50;
+        // remove first point
+        vertices.splice(0, 2);
+        // add new point
+        vertices.push(...coordinates);
 
+        // re-upload buffer data
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
         gl.bufferData(
           gl.ARRAY_BUFFER,
-          new Float32Array(coordinates),
+          new Float32Array(vertices),
           gl.STATIC_DRAW,
         );
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer);
-        gl.bufferData(
-          gl.ARRAY_BUFFER,
-          new Float32Array([size]),
-          gl.STATIC_DRAW,
-        );
         render();
       };
-      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("click", onMouseClick);
 
       // Initial setup
       resize();
