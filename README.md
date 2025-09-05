@@ -16,7 +16,7 @@ yarn
 yarn vite ./src
 ```
 
-## [WebGL Pipeline](./docs/webgl-piplene.md)
+## [WebGL Pipeline](./docs/webgl-pipeline.md)
 
 ## [Basic WebGL Example](./docs/basic-webgl.md)
 
