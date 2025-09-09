@@ -11,25 +11,31 @@ const vertexShaderSource = `#version 300 es
   in vec2 pos;
   in vec3 inColor;
 
+  uniform mat3 u_matrix;
+
   out vec3 fragColor;
 
   void main() {
-  fragColor = inColor;
+    // Coordinates x, y, z.
+    // W is the scale factor.
+    // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#homogeneous_coordinates
+    gl_Position = vec4((u_matrix * vec3(pos.x, -pos.y, 0.0)), 1.0);
 
-  // Coordinates x, y, z.
-  // W is the scale factor.
-  // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#homogeneous_coordinates
-  gl_Position = vec4(pos.x, -pos.y, 0.0, 1.0);
+    fragColor = gl_Position.y > 0.1 ? inColor : vec3(gl_Position.xy * 0.5 + 0.5, 0.0);
 }`;
 const fragmentShaderSource = `#version 300 es
   precision highp float;
   in vec3 fragColor;
 
+  uniform float u_time;
   out vec4 outColor;
 
   void main() {
-  // rgb alpha
-  outColor = vec4(fragColor, 1.0);
+    // rainbow effect with time uniform
+    float r = abs(sin(u_time * 3.0 + fragColor.r * 5.0));
+    float g = abs(sin(u_time * 3.0 + fragColor.g * 5.0 + 2.0));
+    float b = abs(sin(u_time * 3.0 + fragColor.b * 5.0 + 4.0));
+    outColor = vec4(r, g, b, 1.0);
 }`;
 
 // Helper function for shader compilation
@@ -84,44 +90,35 @@ let vertices = [
 ];
 
 let colors = [
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  0.973, 0.514, 0.125, 0.973, 0.514, 0.125, 0.973, 0.514, 0.125,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  //
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
+  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85,
+  0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0,
+  0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
+  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85,
+  0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0,
+  0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
+  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85,
+  0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0,
+  0.85, 0.0, 1.0, 0.85, 0.0, 0.973, 0.514, 0.125, 0.973, 0.514, 0.125, 0.973,
+  0.514, 0.125, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
+  1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
 ];
 
+// prettier-ignore
+const matrix = new Float32Array([
+  1, 0, 0,
+  0, 1, 0,
+  0, 0, 1,
+]);
+
 // attribute setup
+// one buffer for all vertex data and color data
 const positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+gl.bufferData(
+  gl.ARRAY_BUFFER,
+  new Float32Array([...vertices, ...colors]),
+  gl.STATIC_DRAW,
+);
 const positionAttributeLocation = gl.getAttribLocation(program, "pos");
 gl.enableVertexAttribArray(positionAttributeLocation);
 gl.vertexAttribPointer(
@@ -130,11 +127,8 @@ gl.vertexAttribPointer(
   gl.FLOAT, // type of data in buffer
   false, // normalize
   0, // stride (0 = auto)
-  0, // offset
+  0, // offset in bytes
 );
-const colorBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 const colorAttributeLocation = gl.getAttribLocation(program, "inColor");
 gl.enableVertexAttribArray(colorAttributeLocation);
 gl.vertexAttribPointer(
@@ -143,13 +137,22 @@ gl.vertexAttribPointer(
   gl.FLOAT, // type of data in buffer
   false, // normalize
   0, // stride (0 = auto)
-  0, // offset
+  vertices.length * Float32Array.BYTES_PER_ELEMENT, // offset in bytes
 );
+
+// matrix setup
+const matrixLocation = gl.getUniformLocation(program, "u_matrix");
+// time uniform setup
+const timeLocation = gl.getUniformLocation(program, "u_time");
+
+// should use program
+gl.useProgram(program);
+gl.uniformMatrix3fv(matrixLocation, false, matrix);
+gl.uniform1f(timeLocation, 0.0);
 
 // Cleanup function
 const cleanup = () => {
   gl.deleteBuffer(positionBuffer);
-  gl.deleteBuffer(colorBuffer);
   gl.deleteProgram(program);
 };
 
@@ -181,30 +184,31 @@ const resize = () => {
 };
 window.addEventListener("resize", resize);
 
-// interaction
-const onMouseClick = (
-  /** @type {PointerEvent} */
-  event,
-) => {
-  //normalized device coordinates
-  const coordinates = [
-    (event.clientX / window.innerWidth) * 2 - 1,
-    (event.clientY / window.innerHeight) * -2 + 1,
-  ];
-
-  // remove first point
-  vertices.splice(0, 2);
-  // add new point
-  vertices.push(...coordinates);
-
-  // re-upload buffer data
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-  render();
-};
-window.addEventListener("click", onMouseClick);
-
 // Initial setup
 resize();
 render();
+
+const animate = (now) => {
+  // convert to seconds
+  now *= 0.001;
+
+  // Update matrix for rotation
+  const angle = now * 0.5;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  // prettier-ignore
+  matrix.set([
+    sin, -cos, 0,
+    cos, sin, 0,
+    0, 0, 1,
+  ]);
+  gl.uniformMatrix3fv(matrixLocation, false, matrix);
+
+  // Update time uniform
+  gl.uniform1f(timeLocation, (Math.sin(now) + 1) / 2);
+
+  render();
+  requestAnimationFrame(animate);
+};
+requestAnimationFrame(animate);
