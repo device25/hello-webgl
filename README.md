@@ -21,3 +21,15 @@ yarn vite ./src
 ## [Basic WebGL Example](./docs/basic-webgl.md)
 
 ## [Projects](./src/index.html)
+
+## ToDo
+
+- uniform
+- matrix
+- Element Array Buffer (EBO/IBO)
+- sampler2D
+- UV mapping
+- Depth buffer
+- Framebuffers
+- drawArraysInstanced
+- particles
