@@ -1,4 +1,4 @@
-import { createShader } from "../utils/create-shader";
+import { createShader } from "../utils/create-shader.js";
 
 function map(value, minSrc, maxSrc, minDst, maxDst) {
   return ((value - minSrc) / (maxSrc - minSrc)) * (maxDst - minDst) + minDst;
