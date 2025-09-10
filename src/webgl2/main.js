@@ -1,4 +1,4 @@
-import { createShader } from "../utils/create-shader.js";
+import { createProgram } from "../utils/create-program.js";
 
 // 1. WebGL2 context setup
 const canvas = document.getElementById("canvas");
@@ -41,27 +41,8 @@ const fragmentShaderSource = `#version 300 es
     outColor = vec4(r, g, b, 1.0);
 }`;
 
-// 2.2 Shader compilation
-const vs = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-const fs = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-// 2.3 Program linking with error checking
-const program = gl.createProgram();
-gl.attachShader(program, vs);
-gl.attachShader(program, fs);
-gl.linkProgram(program);
-if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-  const error = gl.getProgramInfoLog(program);
-  gl.deleteProgram(program);
-
-  throw new Error(`Program linking failed: ${error}`);
-}
-
-// 2.4 Cleanup shaders after linking
-gl.detachShader(program, vs);
-gl.detachShader(program, fs);
-gl.deleteShader(vs);
-gl.deleteShader(fs);
+// 2.2 Shader compilation and program linking
+const program = createProgram(gl, vertexShaderSource, fragmentShaderSource);
 
 // 3. Buffer and attribute setup
 // 3.1 Vertex data
