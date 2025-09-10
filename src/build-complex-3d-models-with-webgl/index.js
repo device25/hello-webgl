@@ -1,4 +1,4 @@
-import { createShader } from "../utils/create-shader.js";
+import { createProgram } from "../utils/create-program.js";
 
 class Triangles {
   _matrix = window.mat4.create(); // http://glmatrix.net/
@@ -74,22 +74,7 @@ class Triangles {
       }
     `;
 
-    const vertexShader = createShader(
-      this._gl,
-      this._gl.VERTEX_SHADER,
-      vertexSource,
-    );
-    const fragmentShader = createShader(
-      this._gl,
-      this._gl.FRAGMENT_SHADER,
-      fragmentSource,
-    );
-
-    this._shaderProgram = this._gl.createProgram();
-    this._gl.attachShader(this._shaderProgram, vertexShader);
-    this._gl.attachShader(this._shaderProgram, fragmentShader);
-    this._gl.linkProgram(this._shaderProgram);
-    this._gl.useProgram(this._shaderProgram);
+    this._shaderProgram = createProgram(this._gl, vertexSource, fragmentSource);
   }
 
   _createVertices() {
@@ -163,6 +148,7 @@ class Triangles {
 
     this._gl.bindBuffer(this._gl.ARRAY_BUFFER, null);
 
+    this._gl.useProgram(this._shaderProgram);
     const lightColorLocation = this._gl.getUniformLocation(
       this._shaderProgram,
       "lightColor",
