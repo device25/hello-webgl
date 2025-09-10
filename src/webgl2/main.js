@@ -1,4 +1,4 @@
-// WebGL2 context initialization with error checking
+// 1. WebGL2 context setup
 const canvas = document.getElementById("canvas");
 /** @type {WebGL2RenderingContext} */
 const gl = canvas.getContext("webgl2");
@@ -6,10 +6,11 @@ if (!gl) {
   throw new Error("WebGL2 not supported");
 }
 
-// Shader source code
+// 2. Shader program setup
+// 2.1 Shader source code
 const vertexShaderSource = `#version 300 es
-  in vec2 pos;
-  in vec3 inColor;
+  layout(location = 0) in vec2 pos;
+  layout(location = 1) in vec3 inColor;
 
   uniform mat3 u_matrix;
 
@@ -54,11 +55,11 @@ const createShader = (type, source) => {
   return shader;
 };
 
-// Shader compilation
+// 2.2 Shader compilation
 const vs = createShader(gl.VERTEX_SHADER, vertexShaderSource);
 const fs = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-// Program linking with error checking
+// 2.3 Program linking with error checking
 const program = gl.createProgram();
 gl.attachShader(program, vs);
 gl.attachShader(program, fs);
@@ -70,107 +71,113 @@ if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
   throw new Error(`Program linking failed: ${error}`);
 }
 
-// Cleanup shaders after linking
+// 2.4 Cleanup shaders after linking
 gl.detachShader(program, vs);
 gl.detachShader(program, fs);
 gl.deleteShader(vs);
 gl.deleteShader(fs);
 
-let vertices = [
-  -0.547, -0.785, -0.267, -0.897, -0.013, -0.804, -0.547, -0.785, -0.013,
-  -0.804, 0.158, -0.567, -0.547, -0.785, 0.158, -0.567, 0.16, -0.34, -0.547,
-  -0.785, 0.16, -0.34, 0.008, -0.131, 0.461, 0.016, 0.779, -0.006, 0.461, 0.713,
-  0.008, -0.131, 0.461, 0.016, 0.461, 0.713, -0.547, -0.785, 0.008, -0.131,
-  0.461, 0.713, 0.461, 0.713, 0.003, 0.857, -0.44, 0.713, 0.461, 0.713, -0.44,
-  0.713, -0.623, 0.358, 0.461, 0.713, -0.623, 0.358, -0.438, 0.012, 0.461,
-  0.713, -0.438, 0.012, -0.272, -0.04, -0.547, -0.785, 0.461, 0.713, -0.272,
-  -0.04, -0.547, -0.785, -0.272, -0.04, -0.552, -0.137, -0.552, -0.137, -0.794,
-  -0.103, -0.697, -0.302, -0.547, -0.785, -0.552, -0.137, -0.697, -0.302,
-  -0.697, -0.302, -0.705, -0.573, -0.547, -0.785,
-];
+// 3. Buffer and attribute setup
+// 3.1 Vertex data
+// Each vertex consists of 2 position components (x, y) and 3 color components (r, g, b)
+const numComponents = 5;
+const data = new Float32Array([
+  -0.547, -0.785, 1.0, 0.85, 0.0, -0.267, -0.897, 1.0, 0.85, 0.0, -0.013,
+  -0.804, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0, -0.013, -0.804, 1.0,
+  0.85, 0.0, 0.158, -0.567, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0,
+  0.158, -0.567, 1.0, 0.85, 0.0, 0.16, -0.34, 1.0, 0.85, 0.0, -0.547, -0.785,
+  1.0, 0.85, 0.0, 0.16, -0.34, 1.0, 0.85, 0.0, 0.008, -0.131, 1.0, 0.85, 0.0,
+  0.461, 0.016, 1.0, 0.85, 0.0, 0.779, -0.006, 1.0, 0.85, 0.0, 0.461, 0.713,
+  1.0, 0.85, 0.0, 0.008, -0.131, 1.0, 0.85, 0.0, 0.461, 0.016, 1.0, 0.85, 0.0,
+  0.461, 0.713, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0, 0.008, -0.131,
+  1.0, 0.85, 0.0, 0.461, 0.713, 1.0, 0.85, 0.0, 0.461, 0.713, 1.0, 0.85, 0.0,
+  0.003, 0.857, 1.0, 0.85, 0.0, -0.44, 0.713, 1.0, 0.85, 0.0, 0.461, 0.713, 1.0,
+  0.85, 0.0, -0.44, 0.713, 1.0, 0.85, 0.0, -0.623, 0.358, 1.0, 0.85, 0.0, 0.461,
+  0.713, 1.0, 0.85, 0.0, -0.623, 0.358, 1.0, 0.85, 0.0, -0.438, 0.012, 1.0,
+  0.85, 0.0, 0.461, 0.713, 1.0, 0.85, 0.0, -0.438, 0.012, 1.0, 0.85, 0.0,
+  -0.272, -0.04, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0, 0.461, 0.713,
+  1.0, 0.85, 0.0, -0.272, -0.04, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0,
+  -0.272, -0.04, 1.0, 0.85, 0.0, -0.552, -0.137, 1.0, 0.85, 0.0, -0.552, -0.137,
+  0.973, 0.514, 0.125, -0.794, -0.103, 0.973, 0.514, 0.125, -0.697, -0.302,
+  0.973, 0.514, 0.125, -0.547, -0.785, 1.0, 0.85, 0.0, -0.552, -0.137, 1.0,
+  0.85, 0.0, -0.697, -0.302, 1.0, 0.85, 0.0, -0.697, -0.302, 1.0, 0.85, 0.0,
+  -0.705, -0.573, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0,
+]);
+const dataLength = data.length;
 
-let colors = [
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85,
-  0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0,
-  0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85,
-  0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0,
-  0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85,
-  0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0,
-  0.85, 0.0, 1.0, 0.85, 0.0, 0.973, 0.514, 0.125, 0.973, 0.514, 0.125, 0.973,
-  0.514, 0.125, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-  1.0, 0.85, 0.0, 1.0, 0.85, 0.0,
-];
+// 3.2 Create and bind VBO
+const vbo = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(
+  gl.ARRAY_BUFFER, // target
+  data, // data
+  gl.STATIC_DRAW, // usage
+);
 
+// 3.3 Create and set up VAO
+const vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+gl.enableVertexAttribArray(0);
+gl.vertexAttribPointer(
+  0, // attribute location
+  2, // number of elements per attribute
+  gl.FLOAT, // type of elements
+  false, // normalized
+  numComponents * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex
+  0, // offset from the beginning of a single vertex to this attribute
+);
+gl.enableVertexAttribArray(1);
+gl.vertexAttribPointer(
+  1, // attribute location
+  3, // number of elements per attribute
+  gl.FLOAT, // type of elements
+  false, // normalized
+  numComponents * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex
+  2 * Float32Array.BYTES_PER_ELEMENT, // offset from the beginning of a single vertex to this attribute
+);
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+gl.bindVertexArray(null);
+
+// 4. Uniform setup
+gl.useProgram(program);
+const timeLocation = gl.getUniformLocation(program, "u_time");
+
+gl.uniform1f(timeLocation, 0.0);
+const matrixLocation = gl.getUniformLocation(program, "u_matrix");
 // prettier-ignore
 const matrix = new Float32Array([
   1, 0, 0,
   0, 1, 0,
   0, 0, 1,
 ]);
-
-// attribute setup
-// one buffer for all vertex data and color data
-const positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-gl.bufferData(
-  gl.ARRAY_BUFFER,
-  new Float32Array([...vertices, ...colors]),
-  gl.STATIC_DRAW,
-);
-const positionAttributeLocation = gl.getAttribLocation(program, "pos");
-gl.enableVertexAttribArray(positionAttributeLocation);
-gl.vertexAttribPointer(
-  positionAttributeLocation,
-  2, // size (num components)
-  gl.FLOAT, // type of data in buffer
-  false, // normalize
-  0, // stride (0 = auto)
-  0, // offset in bytes
-);
-const colorAttributeLocation = gl.getAttribLocation(program, "inColor");
-gl.enableVertexAttribArray(colorAttributeLocation);
-gl.vertexAttribPointer(
-  colorAttributeLocation,
-  3, // size (num components)
-  gl.FLOAT, // type of data in buffer
-  false, // normalize
-  0, // stride (0 = auto)
-  vertices.length * Float32Array.BYTES_PER_ELEMENT, // offset in bytes
-);
-
-// matrix setup
-const matrixLocation = gl.getUniformLocation(program, "u_matrix");
-// time uniform setup
-const timeLocation = gl.getUniformLocation(program, "u_time");
-
-// should use program
-gl.useProgram(program);
 gl.uniformMatrix3fv(matrixLocation, false, matrix);
-gl.uniform1f(timeLocation, 0.0);
+gl.useProgram(null);
 
-// Cleanup function
-const cleanup = () => {
-  gl.deleteBuffer(positionBuffer);
-  gl.deleteProgram(program);
-};
-
-// Add cleanup on page unload
-window.addEventListener("unload", cleanup);
-
-// Render function with error checking
+// 5. Rendering and animation loop
+// 5.1 Render function with error checking
 const render = () => {
-  gl.useProgram(program);
   const error = gl.getError();
+
   if (error !== gl.NO_ERROR) {
     console.error("WebGL error:", error);
     return;
   }
-  gl.drawArrays(gl.TRIANGLES, 0, 48);
+
+  // Clear the canvas
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // Draw the geometry
+  gl.useProgram(program);
+  gl.bindVertexArray(vao);
+  gl.drawArrays(
+    gl.TRIANGLES, // mode
+    0, // starting index in the enabled arrays
+    dataLength / numComponents, // number of vertices to be rendered
+  );
 };
 
-// Set up canvas size and viewport
+// 5.2 Handle resizing
 const resize = () => {
   const dpr = window.devicePixelRatio || 1;
   const width = window.innerWidth;
@@ -184,16 +191,14 @@ const resize = () => {
 };
 window.addEventListener("resize", resize);
 
-// Initial setup
-resize();
-render();
-
-const animate = (now) => {
+// 5.3 Animation loop
+/** @type {FrameRequestCallback} */
+const animate = (time) => {
   // convert to seconds
-  now *= 0.001;
+  time *= 0.001;
 
   // Update matrix for rotation
-  const angle = now * 0.5;
+  const angle = time * 0.5;
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
 
@@ -206,9 +211,20 @@ const animate = (now) => {
   gl.uniformMatrix3fv(matrixLocation, false, matrix);
 
   // Update time uniform
-  gl.uniform1f(timeLocation, (Math.sin(now) + 1) / 2);
+  gl.uniform1f(timeLocation, (Math.sin(time) + 1) / 2);
 
   render();
   requestAnimationFrame(animate);
 };
+
+// 6. Start the animation loop
+resize();
 requestAnimationFrame(animate);
+
+// 7. Cleanup resources on page unload
+const cleanup = () => {
+  gl.deleteProgram(program);
+  gl.deleteBuffer(vbo);
+  gl.deleteVertexArray(vao);
+};
+window.addEventListener("unload", cleanup);
