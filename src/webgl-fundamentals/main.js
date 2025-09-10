@@ -1,5 +1,7 @@
+import { createShader } from "../utils/create-shader.js";
+
 /**
- * @see {@link https://webglfundamentals.org/webgl/lessons/ru/webgl-resizing-the-canvas.html}
+ * @see https://webglfundamentals.org/webgl/lessons/ru/webgl-resizing-the-canvas.html
  * */
 function resize(gl) {
   const realToCSSPixels = window.devicePixelRatio;
@@ -15,28 +17,6 @@ function resize(gl) {
     gl.canvas.width = displayWidth;
     gl.canvas.height = displayHeight;
   }
-}
-
-function createShader(gl, type, source) {
-  /** создание шейдера */
-  const shader = gl.createShader(type);
-
-  /** устанавливаем шейдеру его программный код */
-  gl.shaderSource(shader, source);
-  /** компилируем шейдер */
-  gl.compileShader(shader);
-
-  const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-
-  /** если компиляция прошла успешно - возвращаем шейдер */
-  if (success) {
-    return shader;
-  }
-
-  console.log(gl.getShaderInfoLog(shader));
-  gl.deleteShader(shader);
-
-  return null;
 }
 
 function createProgram(gl, vertexShader, fragmentShader) {
