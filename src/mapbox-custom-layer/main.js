@@ -1,11 +1,10 @@
-/*global mapboxgl*/
 await import("https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js");
-import { createShader } from "../utils/create-shader.js";
+import { createProgram } from "../utils/create-program.js";
 
-mapboxgl.accessToken =
+window.mapboxgl.accessToken =
   "pk.eyJ1IjoiZGV2aWNlMjUiLCJhIjoiY2lzaGN3d2tiMDAxOTJ6bGYydDZrcHptdiJ9.UK55aUzBquqYns1AdnuTQg";
 
-const map = new mapboxgl.Map({
+const map = new window.mapboxgl.Map({
   container: "map",
   zoom: 3,
   center: [7.5, 58],
@@ -46,29 +45,17 @@ const highlightLayer = {
       }
     `;
 
-    const vsObj = createShader(gl, gl.VERTEX_SHADER, vs);
-    const fsObj = createShader(gl, gl.FRAGMENT_SHADER, fs);
+    this.program = createProgram(gl, vs, fs);
 
-    this.program = gl.createProgram();
-    gl.attachShader(this.program, vsObj);
-    gl.attachShader(this.program, fsObj);
-    gl.linkProgram(this.program);
-    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-      console.error(gl.getProgramInfoLog(this.program));
-    }
-
-    this.aPos = gl.getAttribLocation(this.program, "a_pos");
-    this.uMatrix = gl.getUniformLocation(this.program, "u_matrix");
-
-    const helsinki = mapboxgl.MercatorCoordinate.fromLngLat({
+    const helsinki = window.mapboxgl.MercatorCoordinate.fromLngLat({
       lng: 25.004,
       lat: 60.239,
     });
-    const berlin = mapboxgl.MercatorCoordinate.fromLngLat({
+    const berlin = window.mapboxgl.MercatorCoordinate.fromLngLat({
       lng: 13.403,
       lat: 52.562,
     });
-    const kyiv = mapboxgl.MercatorCoordinate.fromLngLat({
+    const kyiv = window.mapboxgl.MercatorCoordinate.fromLngLat({
       lng: 30.498,
       lat: 50.541,
     });
@@ -87,6 +74,9 @@ const highlightLayer = {
       ]),
       gl.STATIC_DRAW,
     );
+
+    this.aPos = gl.getAttribLocation(this.program, "a_pos");
+    this.uMatrix = gl.getUniformLocation(this.program, "u_matrix");
 
     this.vao = gl.createVertexArray();
     gl.bindVertexArray(this.vao);
