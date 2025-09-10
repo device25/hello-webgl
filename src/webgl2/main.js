@@ -1,3 +1,5 @@
+import { createShader } from "../utils/create-shader.js";
+
 // 1. WebGL2 context setup
 const canvas = document.getElementById("canvas");
 /** @type {WebGL2RenderingContext} */
@@ -39,25 +41,9 @@ const fragmentShaderSource = `#version 300 es
     outColor = vec4(r, g, b, 1.0);
 }`;
 
-// Helper function for shader compilation
-const createShader = (type, source) => {
-  const shader = gl.createShader(type);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const error = gl.getShaderInfoLog(shader);
-    gl.deleteShader(shader);
-
-    throw new Error(`Shader compilation failed: ${error}`);
-  }
-
-  return shader;
-};
-
 // 2.2 Shader compilation
-const vs = createShader(gl.VERTEX_SHADER, vertexShaderSource);
-const fs = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+const vs = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+const fs = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
 
 // 2.3 Program linking with error checking
 const program = gl.createProgram();
