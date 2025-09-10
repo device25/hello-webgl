@@ -1,3 +1,5 @@
+import { createShader } from "../utils/create-shader.js";
+
 class Triangles {
   _matrix = window.mat4.create(); // http://glmatrix.net/
 
@@ -62,23 +64,26 @@ class Triangles {
       }  
     `;
 
-    const vertexShader = this._gl.createShader(this._gl.VERTEX_SHADER);
-    this._gl.shaderSource(vertexShader, vertexSource);
-    this._gl.compileShader(vertexShader);
-
     // mediump NOT medium
     const fragmentSource = `
       precision mediump float;
       varying vec4 varyingColors;
-      
+
       void main(void) {
         gl_FragColor = varyingColors;
       }
     `;
 
-    const fragmentShader = this._gl.createShader(this._gl.FRAGMENT_SHADER);
-    this._gl.shaderSource(fragmentShader, fragmentSource);
-    this._gl.compileShader(fragmentShader);
+    const vertexShader = createShader(
+      this._gl,
+      this._gl.VERTEX_SHADER,
+      vertexSource,
+    );
+    const fragmentShader = createShader(
+      this._gl,
+      this._gl.FRAGMENT_SHADER,
+      fragmentSource,
+    );
 
     this._shaderProgram = this._gl.createProgram();
     this._gl.attachShader(this._shaderProgram, vertexShader);
