@@ -1,3 +1,5 @@
+import { createShader } from "../utils/create-shader";
+
 function map(value, minSrc, maxSrc, minDst, maxDst) {
   return ((value - minSrc) / (maxSrc - minSrc)) * (maxDst - minDst) + minDst;
 }
@@ -44,23 +46,18 @@ class Main {
       }
     `;
 
-    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-    gl.shaderSource(vertexShader, vertexSource);
-    gl.compileShader(vertexShader);
-
     // mediump NOT medium
     const fragmentSource = `
       precision mediump float;
       uniform vec4 color;
-      
+    
       void main() {
         gl_FragColor = color;
       }
     `;
 
-    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragmentShader, fragmentSource);
-    gl.compileShader(fragmentShader);
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
 
     const shaderProgram = gl.createProgram();
     gl.attachShader(shaderProgram, vertexShader);
@@ -162,31 +159,28 @@ function initGL() {
 
 function createShaders() {
   const vertexSource = `
-      attribute vec4 coords;
-      attribute float pointSize;
-      uniform mat4 transformMatrix;
-      void main(void) {
-        gl_Position = transformMatrix * coords;
-        gl_PointSize = pointSize;
-      }
-    `;
+    attribute vec4 coords;
+    attribute float pointSize;
+    uniform mat4 transformMatrix;
 
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(vertexShader, vertexSource);
-  gl.compileShader(vertexShader);
+    void main(void) {
+      gl_Position = transformMatrix * coords;
+      gl_PointSize = pointSize;
+    }
+  `;
 
   // mediump NOT medium
   const fragmentSource = `
       precision mediump float;
       uniform vec4 color;
+      
       void main(void) {
         gl_FragColor = color;
       }
     `;
 
-  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(fragmentShader, fragmentSource);
-  gl.compileShader(fragmentShader);
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
 
   shaderProgram = gl.createProgram();
   gl.attachShader(shaderProgram, vertexShader);
@@ -219,22 +213,6 @@ function createVertices() {
   const color = gl.getUniformLocation(shaderProgram, "color");
   gl.uniform4f(color, 0, 0, 0, 1);
 }
-
-// function rotateY() {
-//   const thisAngle = angle;
-//   const cos = Math.cos(thisAngle);
-//   const sin = Math.sin(thisAngle);
-//   const matrix = new Float32Array(
-//     [
-//       cos, 0, sin, 0,
-//       0, 1, 0, 0,
-//       -sin, 0, cos, 0,
-//       0, 0, 0, 1
-//     ]);
-//   const transformMatrix =
-//     gl.getUniformLocation(shaderProgram, 'transformMatrix');
-//   gl.uniformMatrix4fv(transformMatrix, false, matrix);
-// }
 
 function draw() {
   window.mat4.rotateX(matrix, matrix, -0.007);
