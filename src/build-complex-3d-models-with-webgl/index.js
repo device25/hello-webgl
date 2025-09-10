@@ -1,6 +1,6 @@
 import { createProgram } from "../utils/create-program.js";
 
-class Triangles {
+class Cube {
   _matrix = window.mat4.create(); // http://glmatrix.net/
 
   constructor(props) {
@@ -228,5 +228,5 @@ const props = {
   vertexCount: 36,
 };
 
-const triangles = new Triangles(props);
-triangles.draw();
+const cube = new Cube(props);
+cube.draw();
