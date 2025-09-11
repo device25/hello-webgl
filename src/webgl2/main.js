@@ -22,7 +22,7 @@ const vertexShaderSource = `#version 300 es
     // Coordinates x, y, z.
     // W is the scale factor.
     // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#homogeneous_coordinates
-    gl_Position = vec4((u_matrix * vec3(pos.x, -pos.y, 0.0)), 1.0);
+    gl_Position = vec4((u_matrix * vec3(pos, 0.0)), 1.0);
 
     fragColor = gl_Position.y > 0.1 ? inColor : vec3(gl_Position.xy * 0.5 + 0.5, 0.0);
 }`;
@@ -45,45 +45,37 @@ const fragmentShaderSource = `#version 300 es
 const program = createProgram(gl, vertexShaderSource, fragmentShaderSource);
 
 // 3. Buffer and attribute setup
-// 3.1 Vertex data
+// 3.1 Create and bind VAO (Vertex Array Object)
+const vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+
+// 3.2 Create and bind VBO (Vertex Buffer Object) for vertex data
 // Each vertex consists of 2 position components (x, y) and 3 color components (r, g, b)
 const numComponents = 5;
 const data = new Float32Array([
-  -0.547, -0.785, 1.0, 0.85, 0.0, -0.267, -0.897, 1.0, 0.85, 0.0, -0.013,
-  -0.804, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0, -0.013, -0.804, 1.0,
-  0.85, 0.0, 0.158, -0.567, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0,
-  0.158, -0.567, 1.0, 0.85, 0.0, 0.16, -0.34, 1.0, 0.85, 0.0, -0.547, -0.785,
-  1.0, 0.85, 0.0, 0.16, -0.34, 1.0, 0.85, 0.0, 0.008, -0.131, 1.0, 0.85, 0.0,
-  0.461, 0.016, 1.0, 0.85, 0.0, 0.779, -0.006, 1.0, 0.85, 0.0, 0.461, 0.713,
-  1.0, 0.85, 0.0, 0.008, -0.131, 1.0, 0.85, 0.0, 0.461, 0.016, 1.0, 0.85, 0.0,
-  0.461, 0.713, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0, 0.008, -0.131,
-  1.0, 0.85, 0.0, 0.461, 0.713, 1.0, 0.85, 0.0, 0.461, 0.713, 1.0, 0.85, 0.0,
-  0.003, 0.857, 1.0, 0.85, 0.0, -0.44, 0.713, 1.0, 0.85, 0.0, 0.461, 0.713, 1.0,
-  0.85, 0.0, -0.44, 0.713, 1.0, 0.85, 0.0, -0.623, 0.358, 1.0, 0.85, 0.0, 0.461,
-  0.713, 1.0, 0.85, 0.0, -0.623, 0.358, 1.0, 0.85, 0.0, -0.438, 0.012, 1.0,
-  0.85, 0.0, 0.461, 0.713, 1.0, 0.85, 0.0, -0.438, 0.012, 1.0, 0.85, 0.0,
-  -0.272, -0.04, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0, 0.461, 0.713,
-  1.0, 0.85, 0.0, -0.272, -0.04, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0,
-  -0.272, -0.04, 1.0, 0.85, 0.0, -0.552, -0.137, 1.0, 0.85, 0.0, -0.552, -0.137,
-  0.973, 0.514, 0.125, -0.794, -0.103, 0.973, 0.514, 0.125, -0.697, -0.302,
-  0.973, 0.514, 0.125, -0.547, -0.785, 1.0, 0.85, 0.0, -0.552, -0.137, 1.0,
-  0.85, 0.0, -0.697, -0.302, 1.0, 0.85, 0.0, -0.697, -0.302, 1.0, 0.85, 0.0,
-  -0.705, -0.573, 1.0, 0.85, 0.0, -0.547, -0.785, 1.0, 0.85, 0.0,
+  -0.547, 0.785, 1.0, 0.85, 0.0, -0.267, 0.897, 1.0, 0.85, 0.0, -0.013, 0.804,
+  1.0, 0.85, 0.0, 0.158, 0.567, 1.0, 0.85, 0.0, 0.16, 0.34, 1.0, 0.85, 0.0,
+  0.008, 0.131, 1.0, 0.85, 0.0, 0.461, -0.016, 1.0, 0.85, 0.0, 0.779, 0.006,
+  1.0, 0.85, 0.0, 0.461, -0.713, 1.0, 0.85, 0.0, 0.003, -0.857, 1.0, 0.85, 0.0,
+  -0.44, -0.713, 1.0, 0.85, 0.0, -0.623, -0.358, 1.0, 0.85, 0.0, -0.438, -0.012,
+  1.0, 0.85, 0.0, -0.272, 0.04, 1.0, 0.85, 0.0, -0.552, 0.137, 1.0, 0.85, 0.0,
+  -0.552, 0.137, 0.973, 0.514, 0.125, -0.794, 0.103, 0.973, 0.514, 0.125,
+  -0.697, 0.302, 0.973, 0.514, 0.125, -0.697, 0.302, 1.0, 0.85, 0.0, -0.705,
+  0.573, 1.0, 0.85, 0.0,
 ]);
-const dataLength = data.length;
 
-// 3.2 Create and bind VBO
 const vbo = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+
+// Upload the vertex data to the GPU
 gl.bufferData(
   gl.ARRAY_BUFFER, // target
   data, // data
   gl.STATIC_DRAW, // usage
 );
 
-// 3.3 Create and set up VAO
-const vao = gl.createVertexArray();
-gl.bindVertexArray(vao);
+// 3.3 Define vertex attributes
+// Position attribute
 gl.enableVertexAttribArray(0);
 gl.vertexAttribPointer(
   0, // attribute location
@@ -93,6 +85,7 @@ gl.vertexAttribPointer(
   numComponents * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex
   0, // offset from the beginning of a single vertex to this attribute
 );
+// Color attribute
 gl.enableVertexAttribArray(1);
 gl.vertexAttribPointer(
   1, // attribute location
@@ -102,14 +95,30 @@ gl.vertexAttribPointer(
   numComponents * Float32Array.BYTES_PER_ELEMENT, // size of an individual vertex
   2 * Float32Array.BYTES_PER_ELEMENT, // offset from the beginning of a single vertex to this attribute
 );
-gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+// 3.4 Create and bind EBO (Element Buffer Object) for index data
+const indices = new Uint16Array([
+  0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 6, 7, 8, 5, 6, 8, 0, 5, 8, 8, 9, 10, 8,
+  10, 11, 8, 11, 12, 8, 12, 13, 0, 8, 13, 0, 13, 14, 15, 16, 17, 0, 14, 18, 18,
+  19, 0,
+]);
+
+const ebo = gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+// Unbind VAO
 gl.bindVertexArray(null);
+// Unbind VBO
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+// Note: Do not unbind the EBO while the VAO is bound, as the VAO stores the EBO binding
 
 // 4. Uniform setup
+// 4.1 Get uniform locations and set initial values
 gl.useProgram(program);
 const timeLocation = gl.getUniformLocation(program, "u_time");
-
 gl.uniform1f(timeLocation, 0.0);
+
 const matrixLocation = gl.getUniformLocation(program, "u_matrix");
 // prettier-ignore
 const matrix = new Float32Array([
@@ -137,11 +146,13 @@ const render = () => {
   // Draw the geometry
   gl.useProgram(program);
   gl.bindVertexArray(vao);
-  gl.drawArrays(
+  gl.drawElements(
     gl.TRIANGLES, // mode
-    0, // starting index in the enabled arrays
-    dataLength / numComponents, // number of vertices to be rendered
+    indices.length, // count
+    gl.UNSIGNED_SHORT, // type
+    0, // offset
   );
+  gl.bindVertexArray(null);
 };
 
 // 5.2 Handle resizing
@@ -164,6 +175,7 @@ const animate = (time) => {
   // convert to seconds
   time *= 0.001;
 
+  gl.useProgram(program);
   // Update matrix for rotation
   const angle = time * 0.5;
   const cos = Math.cos(angle);
@@ -171,13 +183,11 @@ const animate = (time) => {
 
   // prettier-ignore
   matrix.set([
-    sin, -cos, 0,
-    cos, sin, 0,
-    0, 0, 1,
+    cos, -sin, 0,
+    sin,  cos, 0,
+      0,    0, 1,
   ]);
   gl.uniformMatrix3fv(matrixLocation, false, matrix);
-
-  // Update time uniform
   gl.uniform1f(timeLocation, (Math.sin(time) + 1) / 2);
 
   render();
