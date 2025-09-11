@@ -16,17 +16,19 @@ yarn
 yarn vite ./src
 ```
 
-## [WebGL Pipeline](./docs/webgl-pipeline.md)
+## Basics
 
-## [Basic WebGL Example](./docs/basic-webgl.md)
+### [WebGL Pipeline](./docs/webgl-pipeline.md)
+
+### [Shader Program Compilation (WebGL2)](./docs/shader-program-compilation.md)
+
+### [Bindings Order](./docs/bindings-order.md)
 
 ## [Projects](./src/index.html)
 
 ## ToDo
 
-- uniform
 - matrix
-- Element Array Buffer (EBO/IBO)
 - sampler2D
 - UV mapping
 - Depth buffer
