@@ -1,4 +1,4 @@
-import { createProgram } from "../utils";
+import { createProgram } from "../utils/create-program.js";
 const { mat4, vec3 } = window;
 
 // 1. WebGL2 context setup
