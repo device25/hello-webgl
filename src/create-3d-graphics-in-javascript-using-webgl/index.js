@@ -1,10 +1,10 @@
-import { createShader } from "../utils/create-shader.js";
+import { createProgram } from "../utils/create-program.js";
 
 function map(value, minSrc, maxSrc, minDst, maxDst) {
   return ((value - minSrc) / (maxSrc - minSrc)) * (maxDst - minDst) + minDst;
 }
 
-class Main {
+class Noise {
   mouseX = 0;
 
   mouseY = 0;
@@ -20,7 +20,7 @@ class Main {
     this.vertexCount = vertexCount;
 
     this._initGL();
-    this._createShaders();
+    this._createProgram();
     this._createVertices(coords, pointSize, color);
 
     this.canvas.addEventListener("mousemove", this._onMouseMove);
@@ -33,9 +33,7 @@ class Main {
     gl.clearColor(0, 0, 1, 1);
   }
 
-  _createShaders() {
-    const { gl } = this;
-
+  _createProgram() {
     const vertexSource = `
       attribute vec4 coords;
       attribute float pointSize;
@@ -56,23 +54,14 @@ class Main {
       }
     `;
 
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-
-    const shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
-    gl.useProgram(shaderProgram);
-
-    this.shaderProgram = shaderProgram;
+    this.shaderProgram = createProgram(this.gl, vertexSource, fragmentSource);
   }
 
   _createVertices(coords, pointSize, color) {
     const { gl, shaderProgram, vertices } = this;
 
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 
     const coordsLocation = gl.getAttribLocation(shaderProgram, "coords");
@@ -81,11 +70,13 @@ class Main {
     gl.enableVertexAttribArray(coordsLocation);
     // gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
+    gl.useProgram(shaderProgram);
     const pointSizeLocation = gl.getAttribLocation(shaderProgram, "pointSize");
     gl.vertexAttrib1f(pointSizeLocation, pointSize);
 
     const colorLocation = gl.getUniformLocation(shaderProgram, "color");
     gl.uniform4f(colorLocation, ...color);
+    gl.useProgram(null);
   }
 
   _onMouseMove = (event) => {
@@ -110,6 +101,7 @@ class Main {
       }
     }
 
+    gl.useProgram(this.shaderProgram);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(this.vertices));
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl[mode], 0, vertexCount);
@@ -139,9 +131,9 @@ for (let i = 0; i < props.vertexCount; i += 1) {
   props.vertices.push(Math.random() * 2 - 1);
 }
 
-const main = new Main(props);
+const noise = new Noise(props);
 
-main.draw();
+noise.draw();
 
 // second example
 
@@ -179,14 +171,7 @@ function createShaders() {
       }
     `;
 
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
-
-  shaderProgram = gl.createProgram();
-  gl.attachShader(shaderProgram, vertexShader);
-  gl.attachShader(shaderProgram, fragmentShader);
-  gl.linkProgram(shaderProgram);
-  gl.useProgram(shaderProgram);
+  shaderProgram = createProgram(gl, vertexSource, fragmentSource);
 }
 
 function createVertices() {
@@ -201,8 +186,9 @@ function createVertices() {
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
+  gl.useProgram(shaderProgram);
   const coords = gl.getAttribLocation(shaderProgram, "coords");
-  //   gl.vertexAttrib3f(coords, 0.5, 0.5, 0);
+  // gl.vertexAttrib3f(coords, 0.5, 0.5, 0);
   gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(coords);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -212,6 +198,7 @@ function createVertices() {
 
   const color = gl.getUniformLocation(shaderProgram, "color");
   gl.uniform4f(color, 0, 0, 0, 1);
+  gl.useProgram(null);
 }
 
 function draw() {
@@ -219,6 +206,7 @@ function draw() {
   window.mat4.rotateY(matrix, matrix, 0.013);
   window.mat4.rotateZ(matrix, matrix, 0.01);
 
+  gl.useProgram(shaderProgram);
   const transformMatrixLocation = gl.getUniformLocation(
     shaderProgram,
     "transformMatrix",
