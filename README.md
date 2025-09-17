@@ -24,11 +24,12 @@ yarn vite ./src
 
 ### [Bindings Order](./docs/bindings-order.md)
 
+### TBD matrix
+
 ## [Projects](./src/index.html)
 
 ## ToDo
 
-- matrix
 - sampler2D
 - UV mapping
 - Depth buffer
