@@ -1,4 +1,4 @@
-import { createShader } from "../utils/create-shader.js";
+import { createProgram } from "../utils/create-program.js";
 
 /**
  * @see https://webglfundamentals.org/webgl/lessons/ru/webgl-resizing-the-canvas.html
@@ -17,25 +17,6 @@ function resize(gl) {
     gl.canvas.width = displayWidth;
     gl.canvas.height = displayHeight;
   }
-}
-
-function createProgram(gl, vertexShader, fragmentShader) {
-  const program = gl.createProgram();
-
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-
-  const success = gl.getProgramParameter(program, gl.LINK_STATUS);
-
-  if (success) {
-    return program;
-  }
-
-  console.log(gl.getProgramInfoLog(program));
-  gl.deleteProgram(program);
-
-  return null;
 }
 
 // возврат случайного целого числа значением от 0 до range-1
@@ -80,14 +61,7 @@ async function main() {
     (res) => res.text(),
   );
 
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-  const fragmentShader = createShader(
-    gl,
-    gl.FRAGMENT_SHADER,
-    fragmentShaderSource,
-  );
-
-  const program = createProgram(gl, vertexShader, fragmentShader);
+  const program = createProgram(gl, vertexShaderSource, fragmentShaderSource);
   const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
   const resolutionUniformLocation = gl.getUniformLocation(
     program,
