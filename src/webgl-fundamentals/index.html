@@ -2,13 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Hello WebGL</title>
-    <link rel="stylesheet" href="main.css" />
+    <title>WebGL Fundamentals</title>
+    <style>
+      body {
+        margin: 0;
+      }
+
+      #canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
     <script type="module" src="main.js"></script>
   </head>
   <body>
     <input id="input" type="range" min="1" max="20" step="1" />
     <input id="fpsInput" type="range" min="1" max="100" step="1" />
-    <canvas id="c"></canvas>
+    <canvas id="canvas"></canvas>
   </body>
 </html>

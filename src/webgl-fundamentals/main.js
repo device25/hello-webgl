@@ -46,7 +46,7 @@ function setRectangle(gl, x, y, width, height) {
 }
 
 async function main() {
-  const canvas = document.getElementById("c");
+  const canvas = document.getElementById("canvas");
   const gl = canvas.getContext("webgl");
 
   if (!gl) {
@@ -54,12 +54,37 @@ async function main() {
     return;
   }
 
-  const vertexShaderSource = await fetch("./index.vertex.glsl").then((res) =>
-    res.text(),
-  );
-  const fragmentShaderSource = await fetch("./index.fragment.glsl").then(
-    (res) => res.text(),
-  );
+  const vertexShaderSource = `
+    // атрибут, который будет получать данные из буфера
+    attribute vec2 a_position;
+    uniform vec2 u_resolution;
+
+    void main() {
+      // преобразуем положение в пикселях к диапазону от 0.0 до 1.0
+      vec2 zeroToOne = a_position / u_resolution;
+
+      // преобразуем из 0->1 в 0->2
+      vec2 zeroToTwo = zeroToOne * 2.0;
+
+      // преобразуем из 0->2 в -1->+1 (пространство отсечения)
+      vec2 clipSpace = zeroToTwo - 1.0;
+
+      gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+    }
+  `;
+  const fragmentShaderSource = `
+    // фрагментные шейдеры не имеют точности по умолчанию, поэтому нам необходимо её
+    // указать. mediump подойдёт для большинства случаев. Он означает "средняя точность"
+    precision mediump float;
+
+    uniform vec4 u_color;
+
+    void main() {
+        // gl_FragColor - специальная переменная фрагментного шейдера.
+        // Она отвечает за установку цвета.
+        gl_FragColor = u_color;
+    }
+  `;
 
   const program = createProgram(gl, vertexShaderSource, fragmentShaderSource);
   const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
