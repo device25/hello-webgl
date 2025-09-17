@@ -1,4 +1,5 @@
-import { createProgram } from "../utils/create-program.js";
+import { createProgram } from "../utils";
+const { mat4, vec3 } = window;
 
 // 1. WebGL2 context setup
 const canvas = document.getElementById("canvas");
@@ -14,7 +15,7 @@ const vertexShaderSource = `#version 300 es
   layout(location = 0) in vec2 pos;
   layout(location = 1) in vec3 inColor;
 
-  uniform mat3 u_matrix;
+  uniform mat4 u_matrix;
 
   out vec3 fragColor;
 
@@ -22,7 +23,7 @@ const vertexShaderSource = `#version 300 es
     // Coordinates x, y, z.
     // W is the scale factor.
     // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#homogeneous_coordinates
-    gl_Position = vec4((u_matrix * vec3(pos, 0.0)), 1.0);
+    gl_Position = vec4(u_matrix * vec4(pos, 0.0, 1.0));
 
     fragColor = gl_Position.y > 0.1 ? inColor : vec3(gl_Position.xy * 0.5 + 0.5, 0.0);
 }`;
@@ -113,6 +114,16 @@ gl.bindVertexArray(null);
 gl.bindBuffer(gl.ARRAY_BUFFER, null);
 // Note: Do not unbind the EBO while the VAO is bound, as the VAO stores the EBO binding
 
+const P = mat4.create();
+const V = mat4.create();
+const VP = mat4.create();
+const M = mat4.create();
+const MVP = mat4.create();
+
+const eye = vec3.fromValues(0, 0, 0.5);
+const target = vec3.fromValues(0, 0, 0);
+const up = vec3.fromValues(0, 1, 0);
+
 // 4. Uniform setup
 // 4.1 Get uniform locations and set initial values
 gl.useProgram(program);
@@ -120,13 +131,10 @@ const timeLocation = gl.getUniformLocation(program, "u_time");
 gl.uniform1f(timeLocation, 0.0);
 
 const matrixLocation = gl.getUniformLocation(program, "u_matrix");
-// prettier-ignore
-const matrix = new Float32Array([
-  1, 0, 0,
-  0, 1, 0,
-  0, 0, 1,
-]);
-gl.uniformMatrix3fv(matrixLocation, false, matrix);
+
+mat4.multiply(MVP, VP, M);
+
+gl.uniformMatrix4fv(matrixLocation, false, MVP);
 gl.useProgram(null);
 
 // 5. Rendering and animation loop
@@ -140,7 +148,7 @@ const render = () => {
   }
 
   // Clear the canvas
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.clearColor(1.0, 1.0, 1.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Draw the geometry
@@ -157,17 +165,32 @@ const render = () => {
 
 // 5.2 Handle resizing
 const resize = () => {
-  const dpr = window.devicePixelRatio || 1;
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
+  const { devicePixelRatio = 1, innerWidth, innerHeight } = window;
+  canvas.width = innerWidth * devicePixelRatio;
+  canvas.height = innerHeight * devicePixelRatio;
+  canvas.style.width = innerWidth + "px";
+  canvas.style.height = innerHeight + "px";
   gl.viewport(0, 0, canvas.width, canvas.height);
+
+  const aspect = canvas.width / canvas.height;
+  // fov, aspect, near, far
+  mat4.perspective(P, (120 * Math.PI) / 180, aspect, 0.01, 100.0);
+  mat4.lookAt(V, eye, target, up);
+  // VP = P * V
+  mat4.multiply(VP, P, V);
+
   render();
 };
 window.addEventListener("resize", resize);
+
+window.addEventListener("mousemove", (e) => {
+  const { innerWidth, innerHeight } = window;
+  const x = (e.x / innerWidth) * 2 - 1;
+  const y = (e.y / innerHeight) * -2 + 1;
+
+  mat4.lookAt(V, eye, vec3.fromValues(x, y, target[2]), up);
+  mat4.multiply(VP, P, V);
+});
 
 // 5.3 Animation loop
 /** @type {FrameRequestCallback} */
@@ -176,18 +199,11 @@ const animate = (time) => {
   time *= 0.001;
 
   gl.useProgram(program);
-  // Update matrix for rotation
-  const angle = time * 0.5;
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
 
-  // prettier-ignore
-  matrix.set([
-    cos, -sin, 0,
-    sin,  cos, 0,
-      0,    0, 1,
-  ]);
-  gl.uniformMatrix3fv(matrixLocation, false, matrix);
+  mat4.rotateY(M, M, 0.003);
+  mat4.multiply(MVP, VP, M);
+
+  gl.uniformMatrix4fv(matrixLocation, false, MVP);
   gl.uniform1f(timeLocation, (Math.sin(time) + 1) / 2);
 
   render();
