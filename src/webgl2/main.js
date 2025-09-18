@@ -1,5 +1,7 @@
 import { createProgram } from "../utils/create-program.js";
-const { mat4, vec3 } = window;
+const {
+  glMatrix: { mat4, vec3 },
+} = window;
 
 // 1. WebGL2 context setup
 const canvas = document.getElementById("canvas");
