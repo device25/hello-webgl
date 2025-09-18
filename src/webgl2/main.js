@@ -120,7 +120,7 @@ const VP = mat4.create();
 const M = mat4.create();
 const MVP = mat4.create();
 
-const eye = vec3.fromValues(0, 0, 0.5);
+const eye = vec3.fromValues(0, 0, 2);
 const target = vec3.fromValues(0, 0, 0);
 const up = vec3.fromValues(0, 1, 0);
 
@@ -174,7 +174,7 @@ const resize = () => {
 
   const aspect = canvas.width / canvas.height;
   // fov, aspect, near, far
-  mat4.perspective(P, (120 * Math.PI) / 180, aspect, 0.01, 100.0);
+  mat4.perspective(P, (60 * Math.PI) / 180, aspect, 0.01, 100.0);
   mat4.lookAt(V, eye, target, up);
   // VP = P * V
   mat4.multiply(VP, P, V);
@@ -185,10 +185,10 @@ window.addEventListener("resize", resize);
 
 window.addEventListener("mousemove", (e) => {
   const { innerWidth, innerHeight } = window;
-  const x = (e.x / innerWidth) * 2 - 1;
-  const y = (e.y / innerHeight) * -2 + 1;
+  target[0] += e.movementX / innerWidth;
+  target[1] -= e.movementY / innerHeight;
 
-  mat4.lookAt(V, eye, vec3.fromValues(x, y, target[2]), up);
+  mat4.lookAt(V, eye, target, up);
   mat4.multiply(VP, P, V);
 });
 
