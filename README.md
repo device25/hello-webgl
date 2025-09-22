@@ -24,9 +24,11 @@ yarn vite ./src
 
 ### [Bindings Order](./docs/bindings-order.md)
 
-### TBD matrix
+### TBD
 
-### TBD Barycentric Coordinates
+-matrix
+-CULL_FACE
+-Barycentric Coordinates
 
 ## [Projects](./src/index.html)
 
