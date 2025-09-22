@@ -26,6 +26,8 @@ yarn vite ./src
 
 ### TBD matrix
 
+### TBD Barycentric Coordinates
+
 ## [Projects](./src/index.html)
 
 ## ToDo
