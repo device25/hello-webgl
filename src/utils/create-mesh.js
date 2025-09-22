@@ -2,7 +2,7 @@
  * Creates a mesh for WebGL.
  * @param {WebGL2RenderingContext} gl - The WebGL2 context.
  * @param {{
- *  verticies: Float32Array,
+ *  vertices: Float32Array,
  *  indices: Uint16Array | Uint32Array,
  *  attributes: Array<{
  *    location: number,
@@ -18,13 +18,13 @@
  *  indexCount: number,
  *  dispose(): void}} The VAO, index count, and dispose method.
  */
-export const createMesh = (gl, { verticies, indices, attributes }) => {
+export const createMesh = (gl, { vertices, indices, attributes }) => {
   const vao = gl.createVertexArray();
   gl.bindVertexArray(vao);
 
   const vbo = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-  gl.bufferData(gl.ARRAY_BUFFER, verticies, gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
   const ebo = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo);

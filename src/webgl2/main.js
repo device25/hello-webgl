@@ -50,7 +50,7 @@ const program = createProgram(
 );
 
 const duckMesh = createMesh(gl, {
-  verticies: new Float32Array([
+  vertices: new Float32Array([
     -0.547, 0.785, 1.0, 0.85, 0.0, -0.267, 0.897, 1.0, 0.85, 0.0, -0.013, 0.804,
     1.0, 0.85, 0.0, 0.158, 0.567, 1.0, 0.85, 0.0, 0.16, 0.34, 1.0, 0.85, 0.0,
     0.008, 0.131, 1.0, 0.85, 0.0, 0.461, -0.016, 1.0, 0.85, 0.0, 0.779, 0.006,
@@ -87,7 +87,7 @@ const duckMesh = createMesh(gl, {
 });
 const cubeMesh = createMesh(gl, {
   // prettier-ignore
-  verticies: new Float32Array([
+  vertices: new Float32Array([
     0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
     0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
     -0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
