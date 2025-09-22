@@ -10,8 +10,8 @@ if (!gl) {
   throw new Error("WebGL2 not supported");
 }
 
-gl.enable(gl.DEPTH_TEST);
-gl.depthFunc(gl.LEQUAL);
+gl.enable(gl.CULL_FACE);
+gl.cullFace(gl.BACK);
 
 const program = createProgram(
   gl,
@@ -62,9 +62,9 @@ const duckMesh = createMesh(gl, {
     -0.705, 0.573, 1.0, 0.85, 0.0,
   ]),
   indices: new Uint16Array([
-    0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5, 6, 7, 8, 5, 6, 8, 0, 5, 8, 8, 9, 10, 8,
-    10, 11, 8, 11, 12, 8, 12, 13, 0, 8, 13, 0, 13, 14, 15, 16, 17, 0, 14, 18,
-    18, 19, 0,
+    2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4, 0, 8, 6, 5, 8, 7, 6, 8, 5, 0, 13, 12, 8,
+    12, 11, 8, 11, 10, 8, 10, 9, 8, 13, 8, 0, 0, 19, 18, 14, 13, 0, 17, 16, 15,
+    18, 14, 0,
   ]),
   attributes: [
     {
@@ -99,12 +99,12 @@ const cubeMesh = createMesh(gl, {
   ]),
   // prettier-ignore
   indices: new Uint16Array([
-    0, 1, 2, 1, 3, 2, // top
+    2, 1, 0, 2, 3, 1, // top
     4, 5, 6, 7, 6, 5, // bottom
-    2, 3, 6, 3, 7, 6, // left
+    6, 3, 2, 6, 7, 3, // left
     0, 1, 4, 1, 5, 4, // right
     1, 7, 5, 7, 1, 3, // front
-    0, 2, 4, 2, 6, 4, // back
+    4, 2, 0, 4, 6, 2, // back
    ]),
   attributes: [
     {
@@ -208,7 +208,7 @@ const resize = () => {
 
   const aspect = canvas.width / canvas.height;
   // fov, aspect, near, far
-  mat4.perspective(P, (60 * Math.PI) / 180, aspect, 1.0, 10.0);
+  mat4.perspective(P, (60 * Math.PI) / 180, aspect, 4.0, 6.0);
   mat4.lookAt(V, eye, target, up);
   // VP = P * V
   mat4.multiply(VP, P, V);
