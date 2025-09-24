@@ -1,5 +1,6 @@
 import "../fps-counter.js";
 import { createProgram, createMesh } from "../utils/index.js";
+import mapUrl from "./map.png";
 const {
   glMatrix: { mat4, vec3 },
 } = window;
@@ -44,6 +45,67 @@ const program = createProgram(
   }`,
 );
 
+const UVtestProgram = createProgram(
+  gl,
+  `#version 300 es
+  layout(location=0) in vec2 aPos;
+  layout(location=1) in vec2 aUV;
+  out vec2 vUV;
+  uniform mat4 u_viewProj;
+  
+  void main() {
+    vUV = aUV;
+    gl_Position = u_viewProj * vec4(aPos, 0.0, 1.0);
+  }`,
+  `#version 300 es
+  precision mediump float;
+  
+  in vec2 vUV;
+  out vec4 outColor;
+  uniform sampler2D uTex;
+
+  void main() {
+    outColor = texture(uTex, vUV);
+  }`,
+);
+
+// Локация юниформа у текстурной программы (кешируем один раз)
+const uTexLoc = gl.getUniformLocation(UVtestProgram, "uTex");
+
+// Создаём текстуру и задаём безопасные параметры (NPOT-friendly)
+const tex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, tex);
+
+// Пока картинка не загрузилась — плейсхолдер 1×1
+gl.texImage2D(
+  gl.TEXTURE_2D,
+  0,
+  gl.RGBA,
+  1,
+  1,
+  0,
+  gl.RGBA,
+  gl.UNSIGNED_BYTE,
+  new Uint8Array([128, 128, 128, 255]),
+);
+
+// Параметры фильтрации/обёртки (без мипов)
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+// Грузим изображение
+const img = new Image();
+img.src = mapUrl;
+img.onload = () => {
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); // обычно нужно, чтобы UV не были вверх ногами
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+  // мипмапы не генерим — так проще и работает для любых размеров
+  gl.bindTexture(gl.TEXTURE_2D, null);
+};
+
 const duckMesh = createMesh(gl, {
   vertices: new Float32Array([
     -0.547, 0.785, 1.0, 0.85, 0.0, -0.267, 0.897, 1.0, 0.85, 0.0, -0.013, 0.804,
@@ -83,14 +145,14 @@ const duckMesh = createMesh(gl, {
 const cubeMesh = createMesh(gl, {
   // prettier-ignore
   vertices: new Float32Array([
-    0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
-    0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-    -0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
-    -0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
+    0.5, 0.5, -0.5, 1.0, 1.0, 0.0,
+    0.5, 0.5, 0.5, 1.0, 1.0, 1.0,
+    -0.5, 0.5, -0.5, 0.0, 1.0, 0.0,
+    -0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
     0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
-    0.5, -0.5, 0.5, 0.0, 0.0, 1.0,
-    -0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
-    -0.5, -0.5, 0.5, 0.0, 1.0, 0.0,
+    0.5, -0.5, 0.5, 1.0, 0.0, 1.0,
+    -0.5, -0.5, -0.5, 0.0, 0.0, 0.0,
+    -0.5, -0.5, 0.5, 0.0, 0.0, 1.0,
   ]),
   // prettier-ignore
   indices: new Uint16Array([
@@ -121,6 +183,31 @@ const cubeMesh = createMesh(gl, {
   ],
 });
 
+const triangleMesh = createMesh(gl, {
+  vertices: new Float32Array([
+    -0.5, -0.5, 0, 0, 0.5, -0.5, 1, 0, 0.5, 0.5, 1, 1, -0.5, 0.5, 0, 1,
+  ]),
+  indices: new Uint16Array([0, 1, 2, 0, 2, 3]),
+  attributes: [
+    {
+      location: 0,
+      size: 2,
+      type: gl.FLOAT,
+      normalized: false,
+      stride: 4 * Float32Array.BYTES_PER_ELEMENT,
+      offset: 0,
+    },
+    {
+      location: 1,
+      size: 2,
+      type: gl.FLOAT,
+      normalized: false,
+      stride: 4 * 4,
+      offset: 2 * Float32Array.BYTES_PER_ELEMENT,
+    },
+  ],
+});
+
 const V = mat4.create();
 const P = mat4.create();
 const VP = mat4.create();
@@ -130,8 +217,8 @@ const up = vec3.fromValues(0, 1, 0);
 
 duckMesh.matrix = mat4.create();
 cubeMesh.matrix = mat4.create();
-mat4.translate(cubeMesh.matrix, cubeMesh.matrix, vec3.fromValues(1.25, 0, 0));
-mat4.translate(duckMesh.matrix, duckMesh.matrix, vec3.fromValues(-1.25, 0, 0));
+mat4.translate(cubeMesh.matrix, cubeMesh.matrix, vec3.fromValues(1.25, 1, 0));
+mat4.translate(duckMesh.matrix, duckMesh.matrix, vec3.fromValues(-1.25, 1, 0));
 
 gl.useProgram(program);
 const viewProjLocation = gl.getUniformLocation(program, "u_viewProj");
@@ -180,6 +267,25 @@ const render = () => {
   gl.drawElements(
     gl.TRIANGLES, // mode
     cubeMesh.indexCount, // count
+    gl.UNSIGNED_SHORT, // type
+    0, // offset
+  );
+
+  gl.useProgram(UVtestProgram);
+  gl.uniformMatrix4fv(
+    gl.getUniformLocation(UVtestProgram, "u_viewProj"),
+    false,
+    VP,
+  );
+  // Привязываем текстуру к юниту 0 и сообщаем шейдеру
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.uniform1i(uTexLoc, 0);
+
+  gl.bindVertexArray(triangleMesh.vao);
+  gl.drawElements(
+    gl.TRIANGLES, // mode
+    triangleMesh.indexCount, // count
     gl.UNSIGNED_SHORT, // type
     0, // offset
   );
