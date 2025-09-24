@@ -1,9 +1,11 @@
+import "../fps-counter.js";
 import { createProgram, createMesh } from "../utils/index.js";
 const {
   glMatrix: { mat4, vec3 },
 } = window;
 
 const canvas = document.getElementById("canvas");
+const fpsCounter = document.querySelector("fps-counter");
 /** @type {WebGL2RenderingContext} */
 const gl = canvas.getContext("webgl2");
 if (!gl) {
@@ -229,11 +231,12 @@ window.addEventListener("mousemove", (e) => {
 // 5.3 Animation loop
 /** @type {FrameRequestCallback} */
 const animate = (time) => {
-  // convert to seconds
-  time *= 0.001;
+  fpsCounter?.update(time);
+
+  const seconds = time * 0.001;
 
   gl.useProgram(program);
-  gl.uniform1f(timeLocation, (Math.sin(time) + 1) / 2);
+  gl.uniform1f(timeLocation, (Math.sin(seconds) + 1) / 2);
 
   render();
   requestAnimationFrame(animate);
