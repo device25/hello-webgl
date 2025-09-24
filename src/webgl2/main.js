@@ -4,6 +4,7 @@ const {
 } = window;
 
 const canvas = document.getElementById("canvas");
+const fpsCounter = document.getElementById("fpsCounter");
 /** @type {WebGL2RenderingContext} */
 const gl = canvas.getContext("webgl2");
 if (!gl) {
@@ -147,6 +148,9 @@ gl.uniform1f(timeLocation, 0.0);
 gl.uniformMatrix4fv(viewProjLocation, false, VP);
 gl.useProgram(null);
 
+let framesSinceLastUpdate = 0;
+let lastFpsUpdate = 0;
+
 const render = () => {
   const error = gl.getError();
 
@@ -229,11 +233,25 @@ window.addEventListener("mousemove", (e) => {
 // 5.3 Animation loop
 /** @type {FrameRequestCallback} */
 const animate = (time) => {
-  // convert to seconds
-  time *= 0.001;
+  if (lastFpsUpdate === 0) {
+    lastFpsUpdate = time;
+  }
+
+  framesSinceLastUpdate += 1;
+  const elapsed = time - lastFpsUpdate;
+  if (elapsed >= 500) {
+    const fps = (framesSinceLastUpdate * 1000) / elapsed;
+    if (fpsCounter) {
+      fpsCounter.textContent = `${fps.toFixed(1)} FPS`;
+    }
+    framesSinceLastUpdate = 0;
+    lastFpsUpdate = time;
+  }
+
+  const seconds = time * 0.001;
 
   gl.useProgram(program);
-  gl.uniform1f(timeLocation, (Math.sin(time) + 1) / 2);
+  gl.uniform1f(timeLocation, (Math.sin(seconds) + 1) / 2);
 
   render();
   requestAnimationFrame(animate);
