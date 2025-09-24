@@ -26,9 +26,9 @@ yarn vite ./src
 
 ### TBD
 
--matrix
--CULL_FACE
--Barycentric Coordinates
+- matrix
+- CULL_FACE
+- Barycentric Coordinates
 
 ## [Projects](./src/index.html)
 
