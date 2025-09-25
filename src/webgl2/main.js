@@ -5,7 +5,11 @@ const {
 } = window;
 
 const canvas = document.getElementById("canvas");
+<<<<<<< HEAD
 const fpsCounter = document.querySelector("fps-counter");
+=======
+const fpsCounter = document.getElementById("fpsCounter");
+>>>>>>> 7de591a (wip)
 /** @type {WebGL2RenderingContext} */
 const gl = canvas.getContext("webgl2");
 if (!gl) {
@@ -148,6 +152,9 @@ const modelLocation = gl.getUniformLocation(program, "u_model");
 gl.uniform1f(timeLocation, 0.0);
 gl.uniformMatrix4fv(viewProjLocation, false, VP);
 gl.useProgram(null);
+
+let framesSinceLastUpdate = 0;
+let lastFpsUpdate = 0;
 
 const render = () => {
   const error = gl.getError();
