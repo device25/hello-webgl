@@ -37,16 +37,9 @@ const program = createProgram(
   `#version 300 es
   precision highp float;
   in vec3 fragColor;
-
-  uniform float u_time;
   out vec4 outColor;
 
   void main() {
-    // rainbow effect with time uniform
-    // float r = abs(sin(u_time * 3.0 + fragColor.r * 5.0));
-    // float g = abs(sin(u_time * 3.0 + fragColor.g * 5.0 + 2.0));
-    // float b = abs(sin(u_time * 3.0 + fragColor.b * 5.0 + 4.0));
-    // outColor = vec4(r, g, b, 1.0);
     outColor = vec4(fragColor, 1.0);
   }`,
 );
@@ -141,11 +134,9 @@ mat4.translate(cubeMesh.matrix, cubeMesh.matrix, vec3.fromValues(1.25, 0, 0));
 mat4.translate(duckMesh.matrix, duckMesh.matrix, vec3.fromValues(-1.25, 0, 0));
 
 gl.useProgram(program);
-const timeLocation = gl.getUniformLocation(program, "u_time");
 const viewProjLocation = gl.getUniformLocation(program, "u_viewProj");
 const modelLocation = gl.getUniformLocation(program, "u_model");
 
-gl.uniform1f(timeLocation, 0.0);
 gl.uniformMatrix4fv(viewProjLocation, false, VP);
 gl.useProgram(null);
 
@@ -163,10 +154,6 @@ const render = () => {
 
   // Draw the geometry
   gl.useProgram(program);
-  mat4.rotateZ(duckMesh.matrix, duckMesh.matrix, 0.006);
-  mat4.rotateX(cubeMesh.matrix, cubeMesh.matrix, 0.006);
-  mat4.rotateY(cubeMesh.matrix, cubeMesh.matrix, 0.002);
-  mat4.rotateZ(cubeMesh.matrix, cubeMesh.matrix, 0.004);
   gl.uniformMatrix4fv(viewProjLocation, false, VP);
 
   gl.bindVertexArray(duckMesh.vao);
@@ -210,7 +197,7 @@ const resize = () => {
 
   const aspect = canvas.width / canvas.height;
   // fov, aspect, near, far
-  mat4.perspective(P, (60 * Math.PI) / 180, aspect, 4.0, 6.0);
+  mat4.perspective(P, (60 * Math.PI) / 180, aspect, 3.5, 6.0);
   mat4.lookAt(V, eye, target, up);
   // VP = P * V
   mat4.multiply(VP, P, V);
@@ -228,15 +215,20 @@ window.addEventListener("mousemove", (e) => {
   mat4.multiply(VP, P, V);
 });
 
+let last = 0;
+
 // 5.3 Animation loop
 /** @type {FrameRequestCallback} */
 const animate = (time) => {
   fpsCounter?.update(time);
 
-  const seconds = time * 0.001;
+  const dt = (time - last) * 0.001;
+  last = time;
 
-  gl.useProgram(program);
-  gl.uniform1f(timeLocation, (Math.sin(seconds) + 1) / 2);
+  mat4.rotateZ(duckMesh.matrix, duckMesh.matrix, 0.9 * dt);
+  mat4.rotateX(cubeMesh.matrix, cubeMesh.matrix, 0.6 * dt);
+  mat4.rotateY(cubeMesh.matrix, cubeMesh.matrix, 0.2 * dt);
+  mat4.rotateZ(cubeMesh.matrix, cubeMesh.matrix, 0.4 * dt);
 
   render();
   requestAnimationFrame(animate);
