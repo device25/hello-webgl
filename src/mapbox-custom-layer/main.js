@@ -29,5 +29,4 @@ map.on("style.load", () => {
 
   map.addLayer(droneLayer);
   droneLayer.setTrack(track);
-  droneLayer.clearTrack();
 });
