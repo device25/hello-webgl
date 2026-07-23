@@ -3,17 +3,22 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "vite ./src",
-    "test": "node --test"
+    "dev": "serve .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "test": "node --test",
+    "check": "npm run lint && npm run format:check && npm test"
   },
   "devDependencies": {
-    "@eslint/css": "^0.11.0",
-    "@eslint/js": "^9.34.0",
-    "@eslint/json": "^0.13.2",
-    "@eslint/markdown": "^7.2.0",
-    "eslint": "^9.34.0",
-    "globals": "^16.3.0",
-    "prettier": "3.6.2",
-    "vite": "7.3.5"
+    "@eslint/css": "^1.4.0",
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^2.0.1",
+    "@eslint/markdown": "^8.0.3",
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0",
+    "prettier": "^3.9.6",
+    "serve": "^14.2.4"
   }
 }

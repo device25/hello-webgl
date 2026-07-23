@@ -7,13 +7,13 @@ A collection of WebGL examples and projects.
 ### Installation
 
 ```shell
-yarn
+npm install
 ```
 
 ### Development
 
 ```shell
-yarn vite ./src
+npm run dev
 ```
 
 ## Basics
@@ -30,7 +30,7 @@ yarn vite ./src
 - CULL_FACE
 - Barycentric Coordinates
 
-## [Projects](./src/index.html)
+## [Projects](./index.html)
 
 ## ToDo
 

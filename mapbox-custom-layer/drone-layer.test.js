@@ -10,6 +10,7 @@ import {
 
 test("projectClip multiplies coordinates by the 4x4 matrix", () => {
   const point = { x: 1, y: 2, z: 3 };
+  // prettier-ignore
   const m = [
     1, 0, 0, 0, // column 0
     0, 1, 0, 0, // column 1
@@ -46,6 +47,7 @@ test("extractTrackTuples flattens line and multiline GeoJSON", () => {
         type: "Feature",
         geometry: {
           type: "MultiLineString",
+          // prettier-ignore
           coordinates: [
             [[6, 7, 8]],
             [[9, 10]],
@@ -68,10 +70,7 @@ test("extractTrackTuples flattens line and multiline GeoJSON", () => {
 
 test("extractTrackTuples rejects unsupported geometry types", () => {
   const unsupported = { type: "Point", coordinates: [0, 0] };
-  assert.throws(
-    () => extractTrackTuples(unsupported),
-    /Unsupported GeoJSON/,
-  );
+  assert.throws(() => extractTrackTuples(unsupported), /Unsupported GeoJSON/);
 });
 
 test("toWorldPoints delegates to MercatorCoordinate.fromLngLat", () => {
@@ -127,11 +126,12 @@ test("createDroneLayer renders contiguous clipped runs only", () => {
 
     layer.setTrack(track);
     layer.onAdd({}, gl);
+    // prettier-ignore
     const identityMatrix = [
-      1, 0, 0, 0, //
-      0, 1, 0, 0, //
-      0, 0, 1, 0, //
-      0, 0, 0, 1, //
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1,
     ];
     layer.render(gl, identityMatrix);
 

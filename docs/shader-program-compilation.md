@@ -27,10 +27,10 @@ const fragmentSource = `#version 300 es
 
 ### Option A — Use project helper
 
-There is a helper at `src/utils/create-program.js` that compiles, links, checks errors, then detaches and deletes shaders.
+There is a helper at `utils/create-program.js` that compiles, links, checks errors, then detaches and deletes shaders.
 
 ```js
-import { createProgram } from "./src/utils/create-program.js";
+import { createProgram } from "./utils/create-program.js";
 const program = createProgram(gl, vertexSource, fragmentSource);
 gl.useProgram(program);
 ```

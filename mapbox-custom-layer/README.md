@@ -1,4 +1,5 @@
-# CPU-Projected Polyline for Mapbox Terrain  
+# CPU-Projected Polyline for Mapbox Terrain
+
 Jitter-free and terrain-occluded custom Mapbox GL JS layer
 
 This project implements a custom Mapbox GL JS layer that draws a 3D polyline **without jitter** and **with correct terrain occlusion** even when Mapbox Terrain (`raster-dem`) is enabled.
@@ -11,6 +12,7 @@ This avoids jitter caused by dynamic DEM tile loading, while still allowing the 
 ## Why this approach works
 
 ### Problem: jitter with `setTerrain()`
+
 Mapbox dynamically refines terrain mesh and updates internal matrices as DEM tiles load.  
 Any world-space geometry rendered through:
 
@@ -21,13 +23,14 @@ gl_Position = u_matrix * vec4(worldPos, 1.0);
 …inherits these small changes, causing visible jitter or vibration of lines.
 
 ### Solution: CPU-projection into screen space
+
 Instead of passing world coordinates to the shader, the layer:
 
-1. Multiplies each world-space point by the map’s view-projection matrix on the CPU  
-2. Computes stable clip-space values  
-3. Converts clip-space → NDC by dividing by W  
-4. Passes `(x, y, z)` in **NDC** directly to the vertex shader  
-5. Uses GPU depth testing so the polyline can disappear behind terrain  
+1. Multiplies each world-space point by the map’s view-projection matrix on the CPU
+2. Computes stable clip-space values
+3. Converts clip-space → NDC by dividing by W
+4. Passes `(x, y, z)` in **NDC** directly to the vertex shader
+5. Uses GPU depth testing so the polyline can disappear behind terrain
 
 Because the geometry is already fully projected, it is no longer influenced by DEM updates.
 
@@ -35,35 +38,38 @@ Because the geometry is already fully projected, it is no longer influenced by D
 
 ## Features
 
-- ✔ **Zero jitter** with terrain  
-- ✔ **Correct occlusion by terrain** using depth test  
-- ✔ Uses track altitudes (`z`) from data  
-- ✔ Full public API to load/update/clear tracks  
-- ✔ Efficient CPU projection  
-- ✔ Clip-safe segmentation of polyline  
-- ✔ Works with any camera motion, zoom, pitch  
-- ✔ Simple and lightweight WebGL2 pipeline  
+- ✔ **Zero jitter** with terrain
+- ✔ **Correct occlusion by terrain** using depth test
+- ✔ Uses track altitudes (`z`) from data
+- ✔ Full public API to load/update/clear tracks
+- ✔ Efficient CPU projection
+- ✔ Clip-safe segmentation of polyline
+- ✔ Works with any camera motion, zoom, pitch
+- ✔ Simple and lightweight WebGL2 pipeline
 
 ---
 
 ## Limitations
 
-- The polyline is rendered in **screen space**, not world space  
-- Does not occlude buildings  
-- Does not support true 3D thickness  
-- Not suitable for 3D meshes requiring lighting  
+- The polyline is rendered in **screen space**, not world space
+- Does not occlude buildings
+- Does not support true 3D thickness
+- Not suitable for 3D meshes requiring lighting
 
 ---
 
 ## Public API
 
 ### `setTrack(geojson)`
+
 Pass a GeoJSON LineString/MultiLineString/Feature/FeatureCollection.
 
 ### `loadTrack(url[, fetchOptions])`
+
 Fetch and load a GeoJSON file.
 
 ### `clearTrack()`
+
 Remove current track.
 
 ---
@@ -72,7 +78,7 @@ Remove current track.
 
 We compute:
 
-```
+```text
 clip = M * world
 ndc = clip.xyz / clip.w
 ```
@@ -128,8 +134,8 @@ map.on("style.load", async () => {
 
 ## File structure
 
-```
-src/
+```text
+mapbox-custom-layer/
 ├── droneLayer.js
 ├── projectClip.js
 └── README.md
@@ -139,11 +145,11 @@ src/
 
 ## Future enhancements
 
-- Screen-space thick lines  
-- Animated marker on path  
-- Gradient coloring (speed/altitude)  
-- Multi-track batching  
-- Instanced rendering  
+- Screen-space thick lines
+- Animated marker on path
+- Gradient coloring (speed/altitude)
+- Multi-track batching
+- Instanced rendering
 
 ---
 
